@@ -2,6 +2,7 @@
 
 let audioFlipCard = new Audio("https://freesound.org/data/previews/536/536782_1415754-lq.mp3");
 let themeSongAudio = new Audio("https://mp3.fastupload.co/data/1617853628/yt1s.com-01-Pokemon-Theme-PortugueseBR.mp3");
+let forward = document.getElementById("forward");
 let pokemonPlayer, pokemonComputer;
 let amountCards = 0;
 let pokemonId = 0;
@@ -14,29 +15,12 @@ let playThemeSong = false;
 themeSongAudio.volume = 0.25;
 themeSongAudio.loop = true;
 
+if (window.location.href.includes("github")) { forward.remove(); }
+
 createOptionsHTML();
 
-function themeSong() {
-  let icon = document.getElementById("theme-song");
-
-  if (playThemeSong) {
-    icon.innerHTML = "🔇";
-  } else {
-    icon.innerHTML = "🔊";
-    themeSongAudio.play();
-  }
-
-  themeSongAudio.muted = playThemeSong;
-  playThemeSong = !playThemeSong;
-}
-
 function newGame() {
-  // Excluir esta linha após finalizar o projeto
-  let forward = document.getElementById("forward")
-
-  if (forward != null) {
-    forward.remove();
-  }
+  if (document.getElementById("forward") != null) { forward.remove(); }
 
   if (atLeastOneChecked()) {
     resetVariables();
@@ -89,24 +73,26 @@ function printsError() {
 }
 
 function showOptions() {
-  optionsOpened = !optionsOpened;
-
   let cards = document.getElementById("player-flip-card");
+  let options = document.getElementById("options");
+  let game = document.getElementById("game");
+  
+  optionsOpened = !optionsOpened;
 
   if (optionsOpened) {
     if (cards != null) {
-      document.getElementById("game").classList.remove("show-game");
+      game.classList.remove("show-game");
       setTimeout(() => {
-        document.getElementById("options").classList.add("ativo");
+        options.classList.add("ativo");
       }, 1000);
     } else {
-      document.getElementById("options").classList.add("ativo");
+      options.classList.add("ativo");
     }
   } else {
-    document.getElementById("options").classList.remove("ativo");
+    options.classList.remove("ativo");
     if (cards != null) {
       setTimeout(() => {
-        document.getElementById("game").classList.add("show-game");
+        game.classList.add("show-game");
       }, 1000);
     }
   }
@@ -213,7 +199,7 @@ function assembleDeck() {
       amountCardsDeck--;
     }
   }
-  
+
   return deck;
 }
 
@@ -371,6 +357,9 @@ async function checkAttribute(attribute) {
       button.classList.add("attributes-not-chosen");
     }
   }
+
+  console.log(playerDeck);
+  console.log(computerDeck);
 
   setTimeout(() => {
     if (pokemonPlayer[attribute] > pokemonComputer[attribute]) {
@@ -650,26 +639,16 @@ function changeBackground(pokemon, challenger) {
   }
 }
 
-// function pokemonTypes() {
+function themeSong() {
+  let icon = document.getElementById("theme-song");
 
-//   let type = [
-//     Bug = { strong-against: [], weak-against: [] },
-//     Dark = { strong-against: [], weak-against: [] },
-//     Dragon = { strong-against: [], weak-against: [] },
-//     Electric = { strong-against: [], weak-against: [] },
-//     Fairy = { strong-against: [], weak-against: [] },
-//     Fighting = { strong-against: [], weak-against: [] },
-//     Fire = { strong-against: [], weak-against: [] },
-//     Flying = { strong-against: [], weak-against: [] },
-//     Ghost = { strong-against: [], weak-against: [] },
-//     Grass = { strong-against: [], weak-against: [] },
-//     Ground = { strong-against: [], weak-against: [] },
-//     Ice = { strong-against: [], weak-against: [] },
-//     Normal = { strong-against: [], weak-against: [] },
-//     Poison = { strong-against: [], weak-against: [] },
-//     Psychic = { strong-against: [], weak-against: [] },
-//     Rock = { strong-against: [], weak-against: [] },
-//     Steel = { strong-against: [], weak-against: [] },
-//     Water = { strong-against: [], weak-against: [] }
+  if (playThemeSong) {
+    icon.innerHTML = "🔇";
+  } else {
+    icon.innerHTML = "🔊";
+    themeSongAudio.play();
+  }
 
-// }
+  themeSongAudio.muted = playThemeSong;
+  playThemeSong = !playThemeSong;
+}
