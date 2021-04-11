@@ -4,13 +4,14 @@ let audioFlipCard = new Audio("https://freesound.org/data/previews/536/536782_14
 let themeSongAudio = new Audio("https://mp3.fastupload.co/data/1617853628/yt1s.com-01-Pokemon-Theme-PortugueseBR.mp3");
 let forward = document.getElementById("forward");
 let pokemonPlayer, pokemonComputer;
-let amountCards = 0;
-let pokemonId = 0;
-let battleNumber = 0;
-let playerDeck = "";
-let computerDeck = "";
 let optionsOpened = true;
 let playThemeSong = false;
+let battleNumber = 0;
+let amountCards = 0;
+let pokemonId = 0;
+let computerDeck = "";
+let playerDeck = "";
+let types = {};
 
 themeSongAudio.volume = 0.25;
 themeSongAudio.loop = true;
@@ -76,7 +77,7 @@ function showOptions() {
   let cards = document.getElementById("player-flip-card");
   let options = document.getElementById("options");
   let game = document.getElementById("game");
-  
+
   optionsOpened = !optionsOpened;
 
   if (optionsOpened) {
@@ -222,34 +223,18 @@ async function addPokemonData(challenger) {
 }
 
 async function buildPokemon() {
-  let pokemonData = await getPokemon();
-  let pokemonSpeciesData = await getPokemonSpecies();
-  let attack = 0;
-  let defense = 0;
-  let speed = 0;
-
-  for (let stats of pokemonData.stats) {
-    if (stats.stat.name == "attack") {
-      attack = stats.base_stat;
-    }
-    if (stats.stat.name == "defense") {
-      defense = stats.base_stat;
-    }
-    if (stats.stat.name == "speed") {
-      speed = stats.base_stat;
-    }
-  }
+  let data = await getPokemon();
 
   return {
-    id: pokemonData.id,
-    name: pokemonData.name,
-    image: pokemonData.image,
-    attack: attack,
-    defense: defense,
-    speed: speed,
-    legendary: pokemonSpeciesData.legendary,
-    mythical: pokemonSpeciesData.mythical,
-    generation: pokemonSpeciesData.generation
+    id: data.id,
+    name: data.name,
+    image: data.image,
+    attack: data.attack,
+    defense: data.defense,
+    speed: data.speed,
+    legendary: data.legendary,
+    mythical: data.mythical,
+    generation: data.generation
   }
 }
 
@@ -257,17 +242,18 @@ async function getPokemon() {
   let pokemonData = {};
 
   await fetch("https://pokeapi.co/api/v2/pokemon/" + pokemonId)
-    .then((response) => response.json())
-    .then((poke) => {
+    .then(response => response.json())
+    .then(poke => {
       pokemonData.id = poke.id;
       pokemonData.name = poke.name;
-      pokemonData.stats = poke.stats.map((stats) => {
-        return stats;
-      });
-      pokemonData.image = "https://assets.pokemon.com/assets/cms2/img/pokedex/full/" +
-        ("00" + pokemonId).slice(-3) + ".png";
+      pokemonData.attack = poke.stats.filter(stats => stats.stat.name == "attack").map(stats => { return stats.base_stat; })[0];
+      pokemonData.defense = poke.stats.filter(stats => stats.stat.name == "defense").map(stats => { return stats.base_stat; })[0];
+      pokemonData.speed = poke.stats.filter(stats => stats.stat.name == "speed").map(stats => { return stats.base_stat; })[0];
+      pokemonData.types = poke.types.map(types => { return types.type.name; });
+      pokemonData.image = "https://assets.pokemon.com/assets/cms2/img/pokedex/full/" + ("00" + pokemonId).slice(-3) + ".png";
     })
     .catch(() => {
+      console.log("Error request pokémon.");
       if (pokemonId == playerDeck[0]) {
         playerDeck[0] = ++pokemonId;
         showPokemonPlayer();
@@ -277,24 +263,18 @@ async function getPokemon() {
       }
     });
 
-  return pokemonData;
-}
-
-async function getPokemonSpecies() {
-  let pokemonSpeciesData = {};
-
   await fetch("https://pokeapi.co/api/v2/pokemon-species/" + pokemonId)
-    .then((response) => response.json())
-    .then((poke) => {
-      pokemonSpeciesData.legendary = poke.is_legendary;
-      pokemonSpeciesData.mythical = poke.is_mythical;
-      pokemonSpeciesData.generation = poke.generation.name;
+    .then(response => response.json())
+    .then(poke => {
+      pokemonData.legendary = poke.is_legendary;
+      pokemonData.mythical = poke.is_mythical;
+      pokemonData.generation = poke.generation.name;
     })
     .catch(() => {
-      console.log("Error request!");
+      console.log("Error request species.");
     })
 
-  return pokemonSpeciesData;
+  return pokemonData;
 }
 
 function endGame() {
@@ -652,3 +632,32 @@ function themeSong() {
   themeSongAudio.muted = playThemeSong;
   playThemeSong = !playThemeSong;
 }
+
+(function buildTypes() {
+  class PokemonType {
+    constructor(strong, weak, immune) {
+      this.strong = strong;
+      this.weak = weak;
+      this.immune = immune;
+    }
+  }
+
+  types["bug"] = new PokemonType(["dark", "grass", "psychic"], ["fire", "flying", "rock"], []);
+  types["dark"] = new PokemonType(["ghost", "psychic"], ["bug", "fairy", "fighting"], ["psychic"]);
+  types["dragon"] = new PokemonType(["dragon"], ["dragon", "fairy", "ice"], []);
+  types["electric"] = new PokemonType(["water", "flying"], ["ground"], []);
+  types["fairy"] = new PokemonType(["dark", "dragon", "fighting"], ["steel", "poison"], ["dragon"]);
+  types["fighting"] = new PokemonType(["dark", "ice", "normal", "rock", "steel"], ["fairy", "flying", "psychic"], []);
+  types["fire"] = new PokemonType(["bug", "grass", "ice", "steel"], ["rock", "ground", "water"], []);
+  types["flying"] = new PokemonType(["bug", "fighting", "grass"], ["electric", "ice", "rock"], ["ground"]);
+  types["ghost"] = new PokemonType(["ghost", "psychic"], ["dark", "ghost"], ["normal", "fighting"]);
+  types["grass"] = new PokemonType(["ground", "rock", "water"], ["bug", "fire", "flying", "ice", "poison"], []);
+  types["ground"] = new PokemonType(["electric", "fire", "poison", "rock", "steel"], ["ice", "grass", "water"], ["electric"]);
+  types["ice"] = new PokemonType(["dragon", "flying", "grass", "ground"], ["fighting", "fire", "rock", "steel"], []);
+  types["normal"] = new PokemonType(["norma"], ["fighting"], ["ghost"]);
+  types["poison"] = new PokemonType(["fairy", "grass"], ["ground", "psychic"], []);
+  types["psychic"] = new PokemonType(["fighting", "poison"], ["bug", "dark", "ghost"], []);
+  types["rock"] = new PokemonType(["bug", "fire", "flying", "ice"], ["fighting", "grass", "ground", "steel", "water"], []);
+  types["steel"] = new PokemonType(["fairy", "ice", "rock"], ["fighting", "fire", "ground"], ["poison"]);
+  types["water"] = new PokemonType(["fire", "ground", "rock"], ["electric", "grass"], []);
+})()
