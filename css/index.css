@@ -1,3 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+@import url('//db.onlinewebfonts.com/c/f4d1593471d222ddebd973210265762a?family=Pokemon');
+/* @font-face {
+  font-family: "Pokemon";
+  src: url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.eot");
+  src: url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.eot?#iefix") format("embedded-opentype")
+  ,    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.woff2") format("woff2")
+  ,    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.woff") format("woff")
+  ,    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.ttf") format("truetype")
+  ,    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.svg#Pokemon") format("svg");
+} */
+
 * {
   /* Evita que o padding empurre as bordas para fora */
   box-sizing: border-box;
@@ -26,10 +39,12 @@ body {
 
 .forward {
   height: auto;
-  top: 10px;
   width: 60%;
+  top: 10px;
   margin: auto;
-  background-color: rgba(255, 255, 255, 40%);
+  background-color: rgba(133, 168, 251, 85%);
+  border: 3px solid;
+  border-color: #1552e1;
   border-radius: 10px;
   padding: 5px 0;
   position: fixed;
@@ -39,7 +54,7 @@ body {
 .forward h6 {
   width: 100%;
   margin: auto;
-  color: blue;
+  color: black;
   font-size: 16px;
 }
 
@@ -93,7 +108,7 @@ body {
 }
 
 .page-title {
-  font-size: 48px;
+  font-size: 40px;
 }
 
 .options {
@@ -107,18 +122,18 @@ body {
 }
 
 .options.ativo {
-  height: 265px;
+  height: 268px;
 }
 
 .fieldset-options {
-  height: 245px;
+  height: 248px;
   width: 320px;
   display: flex;
   position: absolute;
 }
 
 .fieldset-generations {
-  height: 210px;
+  height: 212px;
   width: 160px;
   margin: 3px 10px;
 }
@@ -141,7 +156,7 @@ legend {
 label {
   color: white;
   font-weight: bold;
-  font-size: 20px;
+  font-size: 17px;
 }
 
 select {
@@ -186,11 +201,12 @@ button:focus {
 
 .game-subtitle {
   font-size: 36px;
+  margin: -10px 0 0;
 }
 
 .show-game {
   animation: overflow 3s forwards;
-  height: 390px;
+  height: 420px;
   transition: all 1s ease-in-out;
 }
 
@@ -202,8 +218,8 @@ button:focus {
 
 .flip-card {
   margin: 20px 15px 10px;
-  height: 295px;
-  width: 200px;
+  height: 320px;
+  width: 220px;
   perspective: 1000px;
   transition: 1s;
   display: inline-block;
@@ -223,22 +239,22 @@ button:focus {
 }
 
 .card-back {
-  height: 295px;
-  width: 200px;
+  height: 320px;
+  width: 220px;
   background-size: cover;
   position: absolute;
 }
 
 .img-card-back-background {
-  height: 295px;
-  width: 200px;
+  height: 320px;
+  width: 220px;
   border-radius: 12px;
 }
 
 .card-front {
-  height: 295px;
-  width: 200px;
-  border: 5px #265285 solid;
+  height: 320px;
+  width: 220px;
+  border: #265285 5px solid;
   border-radius: 12px;
   position: absolute;
   text-transform: capitalize;
@@ -249,7 +265,7 @@ button:focus {
   height: 100%;
   width: 100%;
   border-radius: 8px;
-  object-position: -43px;
+  object-position: -45px;
   object-fit: cover;
 }
 
@@ -290,19 +306,41 @@ button:focus {
   transform: scale(1.1);
 }
 
-.img-pokemon {
-  width: 80%;
-}
-
 .pokemon-name {
   height: 40px;
-  font-size: 24px;
-  margin: -10px 0 7px;
+  font-size: 20px;
+  line-height: 24px;
+  margin: 0 0 -4px;
+}
+
+.img-pokemon {
+  width: 75%;
+  margin: -5px 0 0;
+}
+
+.types {
+  margin: -5px 1px 0;
+}
+
+.type {
+  width: 46%;
+  margin: 0 auto;
+  color: white;
+  border: 3px solid;
+  border-radius: 11px;
+  font-family: 'Bangers', cursive;
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  line-height: 14px;
+  padding: 2px;
+  text-transform: uppercase;
+  text-shadow: 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
 }
 
 .container-attribute {
-  width: 180px;
-  margin: 4px auto;
+  width: auto;
+  margin: 5px;
   background-image: radial-gradient(circle at 50% 50%, #ffbb2c 0, #ffac32 12.5%, #ff9b36 25%, #ff8a3a 37.5%, #f2793c 50%, #e3683e 62.5%, #d55a3f 75%, #c84d41 87.5%, #bd4243 100%);
   border: brown 1px solid;
   border-radius: 5px;
@@ -313,8 +351,8 @@ button:focus {
   width: 100%;
   margin: 0;
   background-color: transparent;
-  font-size: 16px;
-  padding: 0 0 4px;
+  font-size: 13px;
+  padding: 0 0 4px 2px;
 }
 
 .attributes-not-chosen {
@@ -324,8 +362,8 @@ button:focus {
 .container-card-counter {
   height: 50px;
   width: 50px;
-  left: -15px;
-  top: -15px;
+  right: -22px;
+  top: -22px;
   position: absolute;
 }
 
@@ -372,15 +410,4 @@ footer {
   padding: 3px;
   position: fixed;
   text-align: center;
-}
-
-@import url(//db.onlinewebfonts.com/c/f4d1593471d222ddebd973210265762a?family=Pokemon);
-@font-face {
-  font-family: "Pokemon";
-  src: url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.eot");
-  src: url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.eot?#iefix") format("embedded-opentype")
-  /* ,    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.woff2") format("woff2") */
-  /* ,    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.woff") format("woff") */
-  ,    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.ttf") format("truetype")
-  ,    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.svg#Pokemon") format("svg");
 }

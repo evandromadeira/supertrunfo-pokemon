@@ -101,10 +101,10 @@ function showOptions() {
 
 function resetVariables() {
   let tagDivFlipCard = document.getElementsByClassName("flip-card");
-  let label = document.getElementById("attribute-choice-label");
+  let label = document.getElementById("page-title");
   amountCards = document.getElementById("amount-cards").value;
 
-  label.innerHTML = "Escolha o seu atributo";
+  label.innerHTML = "Super Trunfo - Pokémon";
   battleNumber = 0;
   playerDeck = "";
   computerDeck = "";
@@ -131,7 +131,7 @@ async function startRound() {
   let computerAttribute = "";
   battleNumber++
 
-  if (battleNumber % 2 > 0) {
+  if (currentPlayer() == "player") {
     changeDisabledAttributeButtons(false);
     showPokemonPlayer();
   } else {
@@ -168,9 +168,11 @@ async function showPokemonPlayer() {
   let flipCardInner = document.getElementById("player-flip-card-inner");
 
   pokemonId = playerDeck[0];
-  pokemonPlayer = await addPokemonData("player");
+  pokemonPlayer = await getPokemon();
 
   changeBackground(pokemonPlayer, "player");
+  buildPokemonCard(pokemonPlayer, "player", 0);
+
   flipCardInner.classList.add("rotate-card");
   audioFlipCard.play();
 }
@@ -179,9 +181,11 @@ async function showPokemonComputer() {
   let flipCardInner = document.getElementById("computer-flip-card-inner");
 
   pokemonId = computerDeck[0];
-  pokemonComputer = await addPokemonData("computer");
+  pokemonComputer = await getPokemon();
 
   changeBackground(pokemonComputer, "computer");
+  buildPokemonCard(pokemonComputer, "computer", 0);
+
   flipCardInner.classList.add("rotate-card");
   audioFlipCard.play();
 }
@@ -204,37 +208,39 @@ function assembleDeck() {
   return deck;
 }
 
-async function addPokemonData(challenger) {
-  let currentPlayer = await buildPokemon();
-
-  let computerImage = document.getElementById(challenger + "-image");
+function buildPokemonCard(currentPokemon, challenger, multiplyAttack) {
   let computerName = document.getElementById(challenger + "-name");
+  let computerImage = document.getElementById(challenger + "-image");
   let computerAttack = document.getElementById(challenger + "-attack");
   let computerDefense = document.getElementById(challenger + "-defense");
   let computerSpeed = document.getElementById(challenger + "-speed");
+  let type1 = document.getElementById(challenger + "-type1");
+  let type2 = document.getElementById(challenger + "-type2");
 
-  computerImage.src = currentPlayer.image;
-  computerName.innerHTML = currentPlayer.name;
-  computerAttack.innerHTML = "Ataque: " + currentPlayer.attack;
-  computerDefense.innerHTML = "Defesa: " + currentPlayer.defense;
-  computerSpeed.innerHTML = "Velocidade: " + currentPlayer.speed;
+  computerName.innerHTML = currentPokemon.name;
+  computerImage.src = currentPokemon.image;
 
-  return currentPlayer;
-}
+  type1.innerHTML = translate(currentPokemon.types[0]);
+  type1.style.backgroundColor = paint(currentPokemon.types[0], "background");
+  type1.style.borderColor = paint(currentPokemon.types[0], "border");
+  
+  if (currentPokemon.types.length > 1) {
+    type2.hidden = false;
+    type2.innerHTML = translate(currentPokemon.types[1]);
+    type2.style.backgroundColor = paint(currentPokemon.types[1], "background");
+    type2.style.borderColor = paint(currentPokemon.types[1], "border");
+  } else {
+    type2.hidden = true;
+  }
 
-async function buildPokemon() {
-  let data = await getPokemon();
+  computerAttack.innerHTML = "Ataque: " + currentPokemon.attack;
+  computerDefense.innerHTML = "Defesa: " + currentPokemon.defense;
+  computerSpeed.innerHTML = "Velocidade: " + currentPokemon.speed;
 
-  return {
-    id: data.id,
-    name: data.name,
-    image: data.image,
-    attack: data.attack,
-    defense: data.defense,
-    speed: data.speed,
-    legendary: data.legendary,
-    mythical: data.mythical,
-    generation: data.generation
+  if (multiplyAttack != 0) {
+    computerAttack.innerHTML += (multiplyAttack > 0 ? " + " : " - ") + parseInt(Math.abs(currentPokemon.attack * multiplyAttack));
+    computerDefense.innerHTML += (multiplyAttack > 0 ? " + " : " - ") + parseInt(Math.abs(currentPokemon.defense * multiplyAttack));
+    computerSpeed.innerHTML += (multiplyAttack > 0 ? " + " : " - ") + parseInt(Math.abs(currentPokemon.speed * multiplyAttack));
   }
 }
 
@@ -278,7 +284,7 @@ async function getPokemon() {
 }
 
 function endGame() {
-  let label = document.getElementById("attribute-choice-label");
+  let label = document.getElementById("page-title");
 
   if (playerDeck.length > 0) {
     label.innerHTML = "VOCÊ VENCEU!";
@@ -326,10 +332,11 @@ function clearAttributeButtons() {
   }
 }
 
-async function checkAttribute(attribute) {
+function checkAttribute(attribute) {
   let playerCard = document.getElementById("player-flip-card");
   let computerCard = document.getElementById("computer-flip-card");
   let buttons = document.getElementsByClassName("attributes");
+  let multiplyAttack = checkType();
 
   // Adiciona sombra nos atributos não escolhidos
   for (let button of buttons) {
@@ -338,8 +345,17 @@ async function checkAttribute(attribute) {
     }
   }
 
-  console.log(playerDeck);
-  console.log(computerDeck);
+  if (multiplyAttack != 0) {
+    let challenger = currentPlayer();
+
+    if (challenger == "player") {
+      buildPokemonCard(pokemonPlayer, challenger, multiplyAttack)
+      pokemonPlayer[attribute] += parseInt(pokemonPlayer[attribute] * multiplyAttack);
+    } else {
+      buildPokemonCard(pokemonComputer, challenger, multiplyAttack)
+      pokemonComputer[attribute] += parseInt(pokemonComputer[attribute] * multiplyAttack);
+    }
+  }
 
   setTimeout(() => {
     if (pokemonPlayer[attribute] > pokemonComputer[attribute]) {
@@ -362,6 +378,43 @@ async function checkAttribute(attribute) {
     refreshCardCounter();
     endRound();
   }, 5000);
+}
+
+function createFieldsetHTML() {
+  let tagFieldsetGenerations = document.createElement("fieldset");
+  let tagLegendGenerations = document.createElement("legend");
+
+  tagFieldsetGenerations.appendChild(tagLegendGenerations);
+
+  tagFieldsetGenerations.setAttribute("id", "fieldset-generations");
+  tagFieldsetGenerations.setAttribute("class", "fieldset-generations");
+
+  tagLegendGenerations.innerHTML = "Gerações";
+
+  for (let x = 1; x <= 8; x++) {
+    let tagDivGenerations = document.createElement("div");
+    let tagInputGenerations = document.createElement("input");
+    let tagLabelGenerations = document.createElement("label");
+
+    tagDivGenerations.appendChild(tagInputGenerations);
+    tagDivGenerations.appendChild(tagLabelGenerations);
+
+    tagFieldsetGenerations.appendChild(tagDivGenerations);
+
+    tagDivGenerations.setAttribute("class", "container-generation");
+
+    tagInputGenerations.setAttribute("id", "generation-" + x);
+    tagInputGenerations.setAttribute("class", "generations");
+    tagInputGenerations.setAttribute("type", "checkbox");
+    // tagInputGenerations.setAttribute("checked", "");
+
+    tagLabelGenerations.setAttribute("for", "generation-" + x);
+    tagLabelGenerations.setAttribute("class", "label-generations");
+
+    tagLabelGenerations.innerHTML = " " + x + "ª geração";
+  }
+
+  return tagFieldsetGenerations;
 }
 
 function createOptionsHTML() {
@@ -434,8 +487,11 @@ function createCardHTML(challenger) {
   let tagDivFlipCardFront = document.createElement("div");
   let tagImgPokemonBackground = document.createElement("img");
   let tagDivPokemonData = document.createElement("div");
-  let tagImgPokemon = document.createElement("img");
   let tagH2PokemonName = document.createElement("h2");
+  let tagImgPokemon = document.createElement("img");
+  let tagDivTypes = document.createElement("div");
+  let tagSpanType1 = document.createElement("span");
+  let tagSpanType2 = document.createElement("span");
   let tagDivButtonAttack = document.createElement("div");
   let tagButtonPokemonAttack = document.createElement("button");
   let tagDivButtonDefense = document.createElement("div");
@@ -443,13 +499,16 @@ function createCardHTML(challenger) {
   let tagDivButtonSpeed = document.createElement("div");
   let tagButtonPokemonSpeed = document.createElement("button");
 
-  tagDivPokemonData.appendChild(tagImgPokemon);
-  tagDivPokemonData.appendChild(tagH2PokemonName);
+  tagDivTypes.appendChild(tagSpanType1);
+  tagDivTypes.appendChild(tagSpanType2);
 
   tagDivButtonAttack.appendChild(tagButtonPokemonAttack);
   tagDivButtonDefense.appendChild(tagButtonPokemonDefense);
   tagDivButtonSpeed.appendChild(tagButtonPokemonSpeed);
 
+  tagDivPokemonData.appendChild(tagH2PokemonName);
+  tagDivPokemonData.appendChild(tagImgPokemon);
+  tagDivPokemonData.appendChild(tagDivTypes);
   tagDivPokemonData.appendChild(tagDivButtonAttack);
   tagDivPokemonData.appendChild(tagDivButtonDefense);
   tagDivPokemonData.appendChild(tagDivButtonSpeed);
@@ -476,14 +535,19 @@ function createCardHTML(challenger) {
   tagDivFlipCardFront.classList.add("card-front");
   tagImgPokemonBackground.classList.add("img-pokemon-background")
   tagDivPokemonData.classList.add("container-pokemon-data");
-  tagImgPokemon.classList.add("img-pokemon");
   tagH2PokemonName.classList.add("pokemon-name", "pokemon-font-color-inverse", "center");
+  tagImgPokemon.classList.add("img-pokemon");
+  tagDivTypes.classList.add("types", "center");
+  tagSpanType1.classList.add("type");
+  tagSpanType2.classList.add("type");
 
   tagDivFlipCard.id = challenger + "-flip-card";
   tagDivFlipCardInner.id = challenger + "-flip-card-inner";
   tagImgPokemonBackground.id = challenger + "-img-pokemon-background";
-  tagImgPokemon.id = challenger + "-image";
   tagH2PokemonName.id = challenger + "-name";
+  tagImgPokemon.id = challenger + "-image";
+  tagSpanType1.id = challenger + "-type1";
+  tagSpanType2.id = challenger + "-type2";
 
   tagDivButtonAttack.classList.add("container-attribute");
   tagDivButtonDefense.classList.add("container-attribute");
@@ -529,41 +593,6 @@ function createCounterHTML(challenger) {
   tagLabelCounter.id = challenger + "-label-card-counter";
 
   tagImgCounter.src = counterBackground;
-}
-
-function createFieldsetHTML() {
-  let tagFieldsetGenerations = document.createElement("fieldset");
-  let tagLegendGenerations = document.createElement("legend");
-
-  tagFieldsetGenerations.appendChild(tagLegendGenerations);
-
-  tagFieldsetGenerations.setAttribute("id", "fieldset-generations");
-  tagFieldsetGenerations.setAttribute("class", "fieldset-generations");
-
-  tagLegendGenerations.innerHTML = "Gerações";
-
-  for (let x = 1; x <= 8; x++) {
-    let tagDivGenerations = document.createElement("div");
-    let tagInputGenerations = document.createElement("input");
-    let tagLabelGenerations = document.createElement("label");
-
-    tagDivGenerations.appendChild(tagInputGenerations);
-    tagDivGenerations.appendChild(tagLabelGenerations);
-
-    tagFieldsetGenerations.appendChild(tagDivGenerations);
-
-    tagInputGenerations.setAttribute("id", "generation-" + x);
-    tagInputGenerations.setAttribute("class", "generations");
-    tagInputGenerations.setAttribute("type", "checkbox");
-    // tagInputGenerations.setAttribute("checked", "");
-
-    tagLabelGenerations.setAttribute("for", "generation-" + x);
-    tagLabelGenerations.setAttribute("class", "label-generations");
-
-    tagLabelGenerations.innerHTML = " " + x + "ª geração";
-  }
-
-  return tagFieldsetGenerations;
 }
 
 function getGenerationsChecked() {
@@ -631,6 +660,133 @@ function themeSong() {
 
   themeSongAudio.muted = playThemeSong;
   playThemeSong = !playThemeSong;
+}
+
+function checkType() {
+  let attackerTypes = battleNumber % 2 > 0 ? pokemonPlayer.types : pokemonComputer.types;
+  let defenderTypes = battleNumber % 2 > 0 ? pokemonComputer.types : pokemonPlayer.types;
+  let multiplyAttack = 0;
+
+  for (let attackerType of attackerTypes) {
+    for (let defenderType of defenderTypes) {
+      multiplyAttack += types[attackerType].strong.indexOf(defenderType) >= 0 ? 0.2 : 0;
+      multiplyAttack += types[attackerType].weak.indexOf(defenderType) >= 0 ? -0.2 : 0;
+      multiplyAttack += types[defenderType].immune.indexOf(attackerType) >= 0 ? -1 : 0;
+      if (types[attackerType].strong.indexOf(defenderType) >= 0) { console.log(attackerType + " strong " + defenderType) }
+      if (types[attackerType].weak.indexOf(defenderType) >= 0) { console.log(attackerType + " weak " + defenderType) }
+      if (types[defenderType].immune.indexOf(attackerType) >= 0) { console.log(defenderType + " immune " + attackerType) }
+    }
+  }
+
+  return multiplyAttack < -1 ? -1 : multiplyAttack;
+}
+
+function currentPlayer() {
+  return battleNumber % 2 > 0 ? "player" : "computer";
+}
+
+function translate(text) {
+  let sentence = {
+    bug: "Inseto",
+    dark: "Noturno",
+    dragon: "Dragão",
+    electric: "Elétrico",
+    fairy: "Fada",
+    fighting: "Lutador",
+    fire: "Fogo",
+    flying: "Voador",
+    ghost: "Fantasma",
+    grass: "Planta",
+    ground: "Terrestre",
+    ice: "Gelo",
+    normal: "normal",
+    poison: "Venenoso",
+    psychic: "Psíquico",
+    rock: "Pedra",
+    steel: "Aço",
+    water: "Água"
+  }
+
+  return sentence[text];
+}
+
+function paint(object, style) {
+  let element = {
+    bug: {
+      background: "#3c9950",
+      border: "#1c4b27"
+    },
+    dark: {
+      background: "#595978",
+      border: "#040707"
+    },
+    dragon: {
+      background: "#62cad9",
+      border: "#448a95"
+    },
+    electric: {
+      background: "#fafa72",
+      border: "#e2e32b"
+    },
+    fairy: {
+      background: "#e91368",
+      border: "#961a45"
+    },
+    fighting: {
+      background: "#ef6239",
+      border: "#994025"
+    },
+    fire: {
+      background: "#fd4b5a",
+      border: "#ab1f24"
+    },
+    flying: {
+      background: "#94b2c7",
+      border: "#4a677d"
+    },
+    ghost: {
+      background: "#906791",
+      border: "#33336b"
+    },
+    grass: {
+      background: "#27cb50",
+      border: "#147b3d"
+    },
+    ground: {
+      background: "#6e491f",
+      border: "#a8702d"
+    },
+    ice: {
+      background: "#d8f0fa",
+      border: "#86d2f5"
+    },
+    normal: {
+      background: "#ca98a6",
+      border: "#75525c"
+    },
+    poison: {
+      background: "#9b69da",
+      border: "#5e2d89"
+    },
+    psychic: {
+      background: "#f71d92",
+      border: "#a52a6c"
+    },
+    rock: {
+      background: "#8b3e22",
+      border: "#48190b"
+    },
+    steel: {
+      background: "#43bd94",
+      border: "#60756e"
+    },
+    water: {
+      background: "#85a8fb",
+      border: "#1552e1"
+    }
+  }
+
+  return element[object][style];
 }
 
 (function buildTypes() {
