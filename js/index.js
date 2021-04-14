@@ -20,366 +20,6 @@ if (window.location.href.includes("github")) { forward.remove(); }
 
 createOptionsHTML();
 
-function newGame() {
-  if (document.getElementById("forward") != null) { forward.remove(); }
-
-  if (atLeastOneChecked()) {
-    resetVariables();
-    createCardHTML("player");
-    createCardHTML("computer");
-    showOptions();
-    setTimeout(() => {
-      buildDeck();
-      refreshCardCounter();
-      startRound();
-    }, 1000);
-  } else {
-    printsError();
-  }
-}
-
-function atLeastOneChecked() {
-  let generations = document.getElementsByClassName("generations");
-  let atLeastOne = false;
-
-  for (let gen of generations) {
-    if (gen.checked) {
-      atLeastOne = true;
-      break;
-    }
-  }
-
-  return atLeastOne;
-}
-
-function printsError() {
-  let tagBody = document.getElementById("body");
-  let tagDiv = document.createElement("div");
-  let tagSpan = document.createElement("span");
-
-  tagDiv.appendChild(tagSpan);
-  tagBody.appendChild(tagDiv);
-
-  tagDiv.classList.add("error-modal");
-  tagDiv.classList.add("center")
-
-  tagSpan.classList.add("animate__animated");
-  tagSpan.classList.add("animate__tada");
-  tagSpan.classList.add("center");
-  tagSpan.innerHTML = "Selecione pelo menos uma geração";
-
-  setTimeout(() => {
-    tagDiv.remove();
-  }, 2500);
-}
-
-function showOptions() {
-  let cards = document.getElementById("player-flip-card");
-  let options = document.getElementById("options");
-  let game = document.getElementById("game");
-
-  optionsOpened = !optionsOpened;
-
-  if (optionsOpened) {
-    if (cards != null) {
-      game.classList.remove("show-game");
-      setTimeout(() => {
-        options.classList.add("ativo");
-      }, 1000);
-    } else {
-      options.classList.add("ativo");
-    }
-  } else {
-    options.classList.remove("ativo");
-    if (cards != null) {
-      setTimeout(() => {
-        game.classList.add("show-game");
-      }, 1000);
-    }
-  }
-}
-
-function resetVariables() {
-  let tagDivFlipCard = document.getElementsByClassName("flip-card");
-  let label = document.getElementById("page-title");
-  amountCards = document.getElementById("amount-cards").value;
-
-  label.innerHTML = "Super Trunfo - Pokémon";
-  battleNumber = 0;
-  playerDeck = "";
-  computerDeck = "";
-
-  for (let x = 0; x < tagDivFlipCard.length; x) {
-    tagDivFlipCard[x].remove();
-  }
-}
-
-function buildDeck() {
-  playerDeck = assembleDeck();
-  computerDeck = assembleDeck();
-}
-
-function refreshCardCounter() {
-  let labelPlayer = document.getElementById("player-label-card-counter");
-  let labelComputer = document.getElementById("computer-label-card-counter");
-
-  labelPlayer.innerHTML = playerDeck.length;
-  labelComputer.innerHTML = computerDeck.length;
-}
-
-async function startRound() {
-  let computerAttribute = "";
-  battleNumber++
-
-  if (currentPlayer() == "player") {
-    changeDisabledAttributeButtons(false);
-    showPokemonPlayer();
-  } else {
-    await showPokemonComputer();
-    computerAttribute = computerAttributeChoice();
-    await showPokemonPlayer();
-    checkAttribute(computerAttribute);
-  }
-}
-
-function endRound() {
-  let playerCard = document.getElementById("player-flip-card");
-  let computerCard = document.getElementById("computer-flip-card");
-  let frontPlayerCard = document.getElementById("player-flip-card-inner");
-  let frontComputerCard = document.getElementById("computer-flip-card-inner");
-
-  playerCard.classList.remove("scaled");
-  computerCard.classList.remove("scaled");
-  frontPlayerCard.classList.remove("rotate-card");
-  frontComputerCard.classList.remove("rotate-card");
-  audioFlipCard.play();
-  clearAttributeButtons();
-
-  if (playerDeck.length > 0 && computerDeck.length > 0) {
-    setTimeout(() => {
-      startRound();
-    }, 1250);
-  } else {
-    endGame();
-  }
-}
-
-async function showPokemonPlayer() {
-  let flipCardInner = document.getElementById("player-flip-card-inner");
-
-  pokemonId = playerDeck[0];
-  pokemonPlayer = await getPokemon();
-
-  changeBackground(pokemonPlayer, "player");
-  buildPokemonCard(pokemonPlayer, "player", 0);
-
-  flipCardInner.classList.add("rotate-card");
-  audioFlipCard.play();
-}
-
-async function showPokemonComputer() {
-  let flipCardInner = document.getElementById("computer-flip-card-inner");
-
-  pokemonId = computerDeck[0];
-  pokemonComputer = await getPokemon();
-
-  changeBackground(pokemonComputer, "computer");
-  buildPokemonCard(pokemonComputer, "computer", 0);
-
-  flipCardInner.classList.add("rotate-card");
-  audioFlipCard.play();
-}
-
-function assembleDeck() {
-  let amountCardsDeck = amountCards;
-  let cardNumber = 0;
-  let deck = [];
-  let pokemonGenerationsChecked = getGenerationsChecked();
-
-  while (amountCardsDeck) {
-    cardNumber = pokemonGenerationsChecked[Math.floor(Math.random() * pokemonGenerationsChecked.length)]
-
-    if (deck.indexOf(cardNumber) == -1) {
-      deck.push(cardNumber);
-      amountCardsDeck--;
-    }
-  }
-
-  return deck;
-}
-
-function buildPokemonCard(currentPokemon, challenger, multiplyAttack) {
-  let computerName = document.getElementById(challenger + "-name");
-  let computerImage = document.getElementById(challenger + "-image");
-  let computerAttack = document.getElementById(challenger + "-attack");
-  let computerDefense = document.getElementById(challenger + "-defense");
-  let computerSpeed = document.getElementById(challenger + "-speed");
-  let type1 = document.getElementById(challenger + "-type1");
-  let type2 = document.getElementById(challenger + "-type2");
-
-  computerName.innerHTML = currentPokemon.name;
-  computerImage.src = currentPokemon.image;
-
-  type1.innerHTML = translate(currentPokemon.types[0]);
-  type1.style.backgroundColor = paint(currentPokemon.types[0], "background");
-  type1.style.borderColor = paint(currentPokemon.types[0], "border");
-  
-  if (currentPokemon.types.length > 1) {
-    type2.hidden = false;
-    type2.innerHTML = translate(currentPokemon.types[1]);
-    type2.style.backgroundColor = paint(currentPokemon.types[1], "background");
-    type2.style.borderColor = paint(currentPokemon.types[1], "border");
-  } else {
-    type2.hidden = true;
-  }
-
-  computerAttack.innerHTML = "Ataque: " + currentPokemon.attack;
-  computerDefense.innerHTML = "Defesa: " + currentPokemon.defense;
-  computerSpeed.innerHTML = "Velocidade: " + currentPokemon.speed;
-
-  if (multiplyAttack != 0) {
-    computerAttack.innerHTML += (multiplyAttack > 0 ? " + " : " - ") + parseInt(Math.abs(currentPokemon.attack * multiplyAttack));
-    computerDefense.innerHTML += (multiplyAttack > 0 ? " + " : " - ") + parseInt(Math.abs(currentPokemon.defense * multiplyAttack));
-    computerSpeed.innerHTML += (multiplyAttack > 0 ? " + " : " - ") + parseInt(Math.abs(currentPokemon.speed * multiplyAttack));
-  }
-}
-
-async function getPokemon() {
-  let pokemonData = {};
-
-  await fetch("https://pokeapi.co/api/v2/pokemon/" + pokemonId)
-    .then(response => response.json())
-    .then(poke => {
-      pokemonData.id = poke.id;
-      pokemonData.name = poke.name;
-      pokemonData.attack = poke.stats.filter(stats => stats.stat.name == "attack").map(stats => { return stats.base_stat; })[0];
-      pokemonData.defense = poke.stats.filter(stats => stats.stat.name == "defense").map(stats => { return stats.base_stat; })[0];
-      pokemonData.speed = poke.stats.filter(stats => stats.stat.name == "speed").map(stats => { return stats.base_stat; })[0];
-      pokemonData.types = poke.types.map(types => { return types.type.name; });
-      pokemonData.image = "https://assets.pokemon.com/assets/cms2/img/pokedex/full/" + ("00" + pokemonId).slice(-3) + ".png";
-    })
-    .catch(() => {
-      console.log("Error request pokémon.");
-      if (pokemonId == playerDeck[0]) {
-        playerDeck[0] = ++pokemonId;
-        showPokemonPlayer();
-      } else {
-        computerDeck[0] = --pokemonId;
-        showPokemonComputer();
-      }
-    });
-
-  await fetch("https://pokeapi.co/api/v2/pokemon-species/" + pokemonId)
-    .then(response => response.json())
-    .then(poke => {
-      pokemonData.legendary = poke.is_legendary;
-      pokemonData.mythical = poke.is_mythical;
-      pokemonData.generation = poke.generation.name;
-    })
-    .catch(() => {
-      console.log("Error request species.");
-    })
-
-  return pokemonData;
-}
-
-function endGame() {
-  let label = document.getElementById("page-title");
-
-  if (playerDeck.length > 0) {
-    label.innerHTML = "VOCÊ VENCEU!";
-  } else {
-    label.innerHTML = "VOCÊ PERDEU PARA O BOT!";
-  }
-
-  showOptions();
-}
-
-async function playerAttributeChoice(playerAttribute) {
-  changeDisabledAttributeButtons(true);
-  await showPokemonComputer();
-  checkAttribute(playerAttribute);
-}
-
-function computerAttributeChoice() {
-  let bestAttribute = "attack";
-  let valueBestAttribute = pokemonComputer.attack;
-
-  if (pokemonComputer.defense > valueBestAttribute) {
-    bestAttribute = "defense";
-    valueBestAttribute = pokemonComputer.defense;
-  }
-  if (pokemonComputer.speed > valueBestAttribute) {
-    bestAttribute = "speed";
-  }
-
-  return bestAttribute;
-}
-
-function changeDisabledAttributeButtons(status) {
-  let attributeButtons = document.getElementsByClassName("attributes");
-
-  for (let button of attributeButtons) {
-    button.disabled = status;
-  }
-}
-
-function clearAttributeButtons() {
-  let attributeButtons = document.getElementsByClassName("attributes");
-
-  for (let button of attributeButtons) {
-    button.classList.remove("attributes-not-chosen");
-  }
-}
-
-function checkAttribute(attribute) {
-  let playerCard = document.getElementById("player-flip-card");
-  let computerCard = document.getElementById("computer-flip-card");
-  let buttons = document.getElementsByClassName("attributes");
-  let multiplyAttack = checkType();
-
-  // Adiciona sombra nos atributos não escolhidos
-  for (let button of buttons) {
-    if (!button.id.includes(attribute)) {
-      button.classList.add("attributes-not-chosen");
-    }
-  }
-
-  if (multiplyAttack != 0) {
-    let challenger = currentPlayer();
-
-    if (challenger == "player") {
-      buildPokemonCard(pokemonPlayer, challenger, multiplyAttack)
-      pokemonPlayer[attribute] += parseInt(pokemonPlayer[attribute] * multiplyAttack);
-    } else {
-      buildPokemonCard(pokemonComputer, challenger, multiplyAttack)
-      pokemonComputer[attribute] += parseInt(pokemonComputer[attribute] * multiplyAttack);
-    }
-  }
-
-  setTimeout(() => {
-    if (pokemonPlayer[attribute] > pokemonComputer[attribute]) {
-      playerCard.classList.add("scaled");
-      playerDeck.push(playerDeck.shift());
-      playerDeck.push(computerDeck.shift());
-    } else if (pokemonPlayer[attribute] == pokemonComputer[attribute]) {
-      playerCard.classList.add("scaled");
-      computerCard.classList.add("scaled");
-      playerDeck.push(playerDeck.shift());
-      computerDeck.push(computerDeck.shift());
-    } else {
-      computerCard.classList.add("scaled");
-      computerDeck.push(computerDeck.shift());
-      computerDeck.push(playerDeck.shift());
-    }
-  }, 1000)
-
-  setTimeout(() => {
-    refreshCardCounter();
-    endRound();
-  }, 5000);
-}
-
 function createFieldsetHTML() {
   let tagFieldsetGenerations = document.createElement("fieldset");
   let tagLegendGenerations = document.createElement("legend");
@@ -595,6 +235,422 @@ function createCounterHTML(challenger) {
   tagImgCounter.src = counterBackground;
 }
 
+function createTypeIcon(type) {
+  let tagSpanType = document.createElement("span");
+
+  tagSpanType.classList.add("type");
+
+  tagSpanType.innerHTML = translate(type);
+  tagSpanType.style.backgroundColor = paint(type, "background");
+  tagSpanType.style.borderColor = paint(type, "border");
+
+  return tagSpanType;
+}
+
+function createTypesComparisonsHTML(tagSpanType1, tagSpanType2, result, messageDelay) {
+  setTimeout(() => {
+    let tagBody = document.getElementById("body");
+
+    let tagDivModal = document.getElementById("types-comparisons-modal");
+    let tagDivComparisons = document.createElement("div");
+    let tagIStatus = document.createElement("i");
+
+    if (!tagDivModal) {
+      tagDivModal = document.createElement("div");
+
+      tagDivModal.id = "types-comparisons-modal";
+      tagDivModal.classList.add("types-comparisons-modal");
+      tagDivModal.classList.add("center");
+
+      tagBody.appendChild(tagDivModal);
+    }
+
+    tagDivModal.appendChild(tagDivComparisons);
+    tagDivComparisons.appendChild(tagSpanType1);
+    tagDivComparisons.appendChild(tagIStatus);
+    tagDivComparisons.appendChild(tagSpanType2);
+
+    tagDivComparisons.classList.add("types-comparisons");
+    tagDivComparisons.classList.add("animate__animated");
+    // Esta tem 1 segundo de duração
+    tagDivComparisons.classList.add("animate__bounceInUp");
+    tagDivComparisons.classList.add("center");
+    tagDivComparisons.addEventListener("animationend", () => {
+      // Esta animação tem 4 segundos de delay e mais 1 segundo de duração
+      tagDivComparisons.classList.add("animate__bounceOutRight", "animate__delay-4s");
+    });
+
+    tagIStatus.classList.add("fas", result);
+
+    setTimeout(() => {
+      tagDivComparisons.remove();
+      if (!document.getElementsByClassName("types-comparisons").length) {
+        tagDivModal.remove();
+      }
+    }, 6000);
+  }, messageDelay);
+}
+
+function newGame() {
+  if (document.getElementById("forward") != null) { forward.remove(); }
+
+  if (atLeastOneChecked()) {
+    resetVariables();
+    createCardHTML("player");
+    createCardHTML("computer");
+    showOptions();
+    setTimeout(() => {
+      buildDeck();
+      refreshCardCounter();
+      startRound();
+    }, 1000);
+  } else {
+    printsError();
+  }
+}
+
+function atLeastOneChecked() {
+  let generations = document.getElementsByClassName("generations");
+  let atLeastOne = false;
+
+  for (let gen of generations) {
+    if (gen.checked) {
+      atLeastOne = true;
+      break;
+    }
+  }
+
+  return atLeastOne;
+}
+
+function printsError() {
+  let tagBody = document.getElementById("body");
+  let tagDiv = document.createElement("div");
+  let tagSpan = document.createElement("span");
+
+  tagDiv.appendChild(tagSpan);
+  tagBody.appendChild(tagDiv);
+
+  tagDiv.classList.add("error-modal");
+  tagDiv.classList.add("center")
+
+  tagSpan.classList.add("animate__animated");
+  tagSpan.classList.add("animate__tada");
+  tagSpan.classList.add("center");
+  tagSpan.innerHTML = "Selecione pelo menos uma geração";
+
+  setTimeout(() => {
+    tagDiv.remove();
+  }, 2500);
+}
+
+function showOptions() {
+  let cards = document.getElementById("player-flip-card");
+  let options = document.getElementById("options");
+  let game = document.getElementById("game");
+
+  optionsOpened = !optionsOpened;
+
+  if (optionsOpened) {
+    if (cards != null) {
+      game.classList.remove("show-game");
+      setTimeout(() => {
+        options.classList.add("ativo");
+      }, 1000);
+    } else {
+      options.classList.add("ativo");
+    }
+  } else {
+    options.classList.remove("ativo");
+    if (cards != null) {
+      setTimeout(() => {
+        game.classList.add("show-game");
+      }, 1000);
+    }
+  }
+}
+
+function resetVariables() {
+  let tagDivFlipCard = document.getElementsByClassName("flip-card");
+  let label = document.getElementById("page-title");
+  amountCards = document.getElementById("amount-cards").value;
+
+  label.innerHTML = "Super Trunfo - Pokémon";
+  battleNumber = 0;
+  playerDeck = "";
+  computerDeck = "";
+
+  for (let x = 0; x < tagDivFlipCard.length; x) {
+    tagDivFlipCard[x].remove();
+  }
+}
+
+function buildDeck() {
+  playerDeck = assembleDeck();
+  computerDeck = assembleDeck();
+}
+
+function refreshCardCounter() {
+  let labelPlayer = document.getElementById("player-label-card-counter");
+  let labelComputer = document.getElementById("computer-label-card-counter");
+
+  labelPlayer.innerHTML = playerDeck.length;
+  labelComputer.innerHTML = computerDeck.length;
+}
+
+async function startRound() {
+  let computerAttribute = "";
+  battleNumber++
+
+  if (currentPlayer() == "player") {
+    changeDisabledAttributeButtons(false);
+    showPokemonPlayer();
+  } else {
+    await showPokemonComputer();
+    computerAttribute = computerAttributeChoice();
+    await showPokemonPlayer();
+    checkAttribute(computerAttribute);
+  }
+}
+
+function endRound() {
+  let playerCard = document.getElementById("player-flip-card");
+  let computerCard = document.getElementById("computer-flip-card");
+  let frontPlayerCard = document.getElementById("player-flip-card-inner");
+  let frontComputerCard = document.getElementById("computer-flip-card-inner");
+
+  playerCard.classList.remove("scaled");
+  computerCard.classList.remove("scaled");
+  frontPlayerCard.classList.remove("rotate-card");
+  frontComputerCard.classList.remove("rotate-card");
+  audioFlipCard.play();
+  clearAttributeButtons();
+
+  if (playerDeck.length > 0 && computerDeck.length > 0) {
+    setTimeout(() => {
+      startRound();
+    }, 1250);
+  } else {
+    endGame();
+  }
+}
+
+async function showPokemonPlayer() {
+  let flipCardInner = document.getElementById("player-flip-card-inner");
+
+  pokemonId = playerDeck[0];
+  pokemonPlayer = await getPokemon();
+
+  changeBackground(pokemonPlayer, "player");
+  buildPokemonCard(pokemonPlayer, "player", 0);
+
+  flipCardInner.classList.add("rotate-card");
+  audioFlipCard.play();
+}
+
+async function showPokemonComputer() {
+  let flipCardInner = document.getElementById("computer-flip-card-inner");
+
+  pokemonId = computerDeck[0];
+  pokemonComputer = await getPokemon();
+
+  changeBackground(pokemonComputer, "computer");
+  buildPokemonCard(pokemonComputer, "computer", 0);
+
+  flipCardInner.classList.add("rotate-card");
+  audioFlipCard.play();
+}
+
+function assembleDeck() {
+  let amountCardsDeck = amountCards;
+  let cardNumber = 0;
+  let deck = [];
+  let pokemonGenerationsChecked = getGenerationsChecked();
+
+  while (amountCardsDeck) {
+    cardNumber = pokemonGenerationsChecked[Math.floor(Math.random() * pokemonGenerationsChecked.length)]
+
+    if (deck.indexOf(cardNumber) == -1) {
+      deck.push(cardNumber);
+      amountCardsDeck--;
+    }
+  }
+
+  return deck;
+}
+
+function buildPokemonCard(currentPokemon, challenger, multiplyAttack) {
+  let computerName = document.getElementById(challenger + "-name");
+  let computerImage = document.getElementById(challenger + "-image");
+  let computerAttack = document.getElementById(challenger + "-attack");
+  let computerDefense = document.getElementById(challenger + "-defense");
+  let computerSpeed = document.getElementById(challenger + "-speed");
+  let type1 = document.getElementById(challenger + "-type1");
+  let type2 = document.getElementById(challenger + "-type2");
+
+  computerName.innerHTML = currentPokemon.name;
+  computerImage.src = currentPokemon.image;
+
+  type1.innerHTML = translate(currentPokemon.types[0]);
+  type1.style.backgroundColor = paint(currentPokemon.types[0], "background");
+  type1.style.borderColor = paint(currentPokemon.types[0], "border");
+
+  if (currentPokemon.types.length > 1) {
+    type2.hidden = false;
+    type2.innerHTML = translate(currentPokemon.types[1]);
+    type2.style.backgroundColor = paint(currentPokemon.types[1], "background");
+    type2.style.borderColor = paint(currentPokemon.types[1], "border");
+  } else {
+    type2.hidden = true;
+  }
+
+  computerAttack.innerHTML = "Ataque: " + currentPokemon.attack;
+  computerDefense.innerHTML = "Defesa: " + currentPokemon.defense;
+  computerSpeed.innerHTML = "Velocidade: " + currentPokemon.speed;
+
+  if (multiplyAttack != 0) {
+    computerAttack.innerHTML += (multiplyAttack > 0 ? " + " : " - ") + parseInt(Math.abs(currentPokemon.attack * multiplyAttack));
+    computerDefense.innerHTML += (multiplyAttack > 0 ? " + " : " - ") + parseInt(Math.abs(currentPokemon.defense * multiplyAttack));
+    computerSpeed.innerHTML += (multiplyAttack > 0 ? " + " : " - ") + parseInt(Math.abs(currentPokemon.speed * multiplyAttack));
+  }
+}
+
+async function getPokemon() {
+  let pokemonData = {};
+
+  await fetch("https://pokeapi.co/api/v2/pokemon/" + pokemonId)
+    .then(response => response.json())
+    .then(poke => {
+      pokemonData.id = poke.id;
+      pokemonData.name = poke.name;
+      pokemonData.attack = poke.stats.filter(stats => stats.stat.name == "attack").map(stats => { return stats.base_stat; })[0];
+      pokemonData.defense = poke.stats.filter(stats => stats.stat.name == "defense").map(stats => { return stats.base_stat; })[0];
+      pokemonData.speed = poke.stats.filter(stats => stats.stat.name == "speed").map(stats => { return stats.base_stat; })[0];
+      pokemonData.types = poke.types.map(types => { return types.type.name; });
+      pokemonData.image = "https://assets.pokemon.com/assets/cms2/img/pokedex/full/" + ("00" + pokemonId).slice(-3) + ".png";
+    })
+    .catch(() => {
+      console.log("Error request pokémon.");
+      if (pokemonId == playerDeck[0]) {
+        playerDeck[0] = ++pokemonId;
+        showPokemonPlayer();
+      } else {
+        computerDeck[0] = --pokemonId;
+        showPokemonComputer();
+      }
+    });
+
+  await fetch("https://pokeapi.co/api/v2/pokemon-species/" + pokemonId)
+    .then(response => response.json())
+    .then(poke => {
+      pokemonData.legendary = poke.is_legendary;
+      pokemonData.mythical = poke.is_mythical;
+      pokemonData.generation = poke.generation.name;
+    })
+    .catch(() => {
+      console.log("Error request species.");
+    })
+
+  return pokemonData;
+}
+
+function endGame() {
+  let label = document.getElementById("page-title");
+
+  if (playerDeck.length > 0) {
+    label.innerHTML = "VOCÊ VENCEU!";
+  } else {
+    label.innerHTML = "VOCÊ PERDEU PARA O BOT!";
+  }
+
+  showOptions();
+}
+
+async function playerAttributeChoice(playerAttribute) {
+  changeDisabledAttributeButtons(true);
+  await showPokemonComputer();
+  checkAttribute(playerAttribute);
+}
+
+function computerAttributeChoice() {
+  let bestAttribute = "attack";
+  let valueBestAttribute = pokemonComputer.attack;
+
+  if (pokemonComputer.defense > valueBestAttribute) {
+    bestAttribute = "defense";
+    valueBestAttribute = pokemonComputer.defense;
+  }
+  if (pokemonComputer.speed > valueBestAttribute) {
+    bestAttribute = "speed";
+  }
+
+  return bestAttribute;
+}
+
+function changeDisabledAttributeButtons(status) {
+  let attributeButtons = document.getElementsByClassName("attributes");
+
+  for (let button of attributeButtons) {
+    button.disabled = status;
+  }
+}
+
+function clearAttributeButtons() {
+  let attributeButtons = document.getElementsByClassName("attributes");
+
+  for (let button of attributeButtons) {
+    button.classList.remove("attributes-not-chosen");
+  }
+}
+
+function checkAttribute(attribute) {
+  let playerCard = document.getElementById("player-flip-card");
+  let computerCard = document.getElementById("computer-flip-card");
+  let buttons = document.getElementsByClassName("attributes");
+  let multiplyAttack = checkType();
+
+  // Adiciona sombra nos atributos não escolhidos
+  for (let button of buttons) {
+    if (!button.id.includes(attribute)) {
+      button.classList.add("attributes-not-chosen");
+    }
+  }
+
+  if (multiplyAttack != 0) {
+    let challenger = currentPlayer();
+
+    if (challenger == "player") {
+      buildPokemonCard(pokemonPlayer, challenger, multiplyAttack)
+      pokemonPlayer[attribute] += parseInt(pokemonPlayer[attribute] * multiplyAttack);
+    } else {
+      buildPokemonCard(pokemonComputer, challenger, multiplyAttack)
+      pokemonComputer[attribute] += parseInt(pokemonComputer[attribute] * multiplyAttack);
+    }
+  }
+
+  setTimeout(() => {
+    if (pokemonPlayer[attribute] > pokemonComputer[attribute]) {
+      playerCard.classList.add("scaled");
+      playerDeck.push(playerDeck.shift());
+      playerDeck.push(computerDeck.shift());
+    } else if (pokemonPlayer[attribute] == pokemonComputer[attribute]) {
+      playerCard.classList.add("scaled");
+      computerCard.classList.add("scaled");
+      playerDeck.push(playerDeck.shift());
+      computerDeck.push(computerDeck.shift());
+    } else {
+      computerCard.classList.add("scaled");
+      computerDeck.push(computerDeck.shift());
+      computerDeck.push(playerDeck.shift());
+    }
+  }, 1000)
+
+  setTimeout(() => {
+    refreshCardCounter();
+    endRound();
+  }, 5000);
+}
+
 function getGenerationsChecked() {
   let generationsData = setGenerationsData();
   let arrayGenerationsChecked = [];
@@ -666,15 +722,23 @@ function checkType() {
   let attackerTypes = battleNumber % 2 > 0 ? pokemonPlayer.types : pokemonComputer.types;
   let defenderTypes = battleNumber % 2 > 0 ? pokemonComputer.types : pokemonPlayer.types;
   let multiplyAttack = 0;
+  let setDelay = 250;
+  let times = 0;
 
   for (let attackerType of attackerTypes) {
     for (let defenderType of defenderTypes) {
-      multiplyAttack += types[attackerType].strong.indexOf(defenderType) >= 0 ? 0.2 : 0;
-      multiplyAttack += types[attackerType].weak.indexOf(defenderType) >= 0 ? -0.2 : 0;
-      multiplyAttack += types[defenderType].immune.indexOf(attackerType) >= 0 ? -1 : 0;
-      if (types[attackerType].strong.indexOf(defenderType) >= 0) { console.log(attackerType + " strong " + defenderType) }
-      if (types[attackerType].weak.indexOf(defenderType) >= 0) { console.log(attackerType + " weak " + defenderType) }
-      if (types[defenderType].immune.indexOf(attackerType) >= 0) { console.log(defenderType + " immune " + attackerType) }
+      if (types[attackerType].strong.indexOf(defenderType) >= 0) {
+        createTypesComparisonsHTML(createTypeIcon(attackerType), createTypeIcon(defenderType), "fa-greater-than", setDelay * times++);
+        multiplyAttack += 0.2;
+      }
+      if (types[attackerType].weak.indexOf(defenderType) >= 0) {
+        createTypesComparisonsHTML(createTypeIcon(attackerType), createTypeIcon(defenderType), "fa-less-than", setDelay * times++);
+        multiplyAttack += -0.2;
+      }
+      if (types[defenderType].immune.indexOf(attackerType) >= 0) {
+        createTypesComparisonsHTML(createTypeIcon(defenderType), createTypeIcon(attackerType), "fa-minus-circle", setDelay * times++);
+        multiplyAttack += -1;
+      }
     }
   }
 
@@ -810,7 +874,7 @@ function paint(object, style) {
   types["grass"] = new PokemonType(["ground", "rock", "water"], ["bug", "fire", "flying", "ice", "poison"], []);
   types["ground"] = new PokemonType(["electric", "fire", "poison", "rock", "steel"], ["ice", "grass", "water"], ["electric"]);
   types["ice"] = new PokemonType(["dragon", "flying", "grass", "ground"], ["fighting", "fire", "rock", "steel"], []);
-  types["normal"] = new PokemonType(["norma"], ["fighting"], ["ghost"]);
+  types["normal"] = new PokemonType(["normal"], ["fighting"], ["ghost"]);
   types["poison"] = new PokemonType(["fairy", "grass"], ["ground", "psychic"], []);
   types["psychic"] = new PokemonType(["fighting", "poison"], ["bug", "dark", "ghost"], []);
   types["rock"] = new PokemonType(["bug", "fire", "flying", "ice"], ["fighting", "grass", "ground", "steel", "water"], []);
