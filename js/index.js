@@ -9,6 +9,9 @@ let playThemeSong = false;
 let battleNumber = 0;
 let amountCards = 0;
 let pokemonId = 0;
+let computerHp = 0;
+let playerHp = 0;
+let totalHp = 0;
 let computerDeck = "";
 let playerDeck = "";
 let types = {};
@@ -17,8 +20,6 @@ themeSongAudio.volume = 0.25;
 themeSongAudio.loop = true;
 
 if (window.location.href.includes("github")) { forward.remove(); }
-
-createOptionsHTML();
 
 function createFieldsetHTML() {
   let tagFieldsetGenerations = document.createElement("fieldset");
@@ -46,7 +47,7 @@ function createFieldsetHTML() {
     tagInputGenerations.setAttribute("id", "generation-" + x);
     tagInputGenerations.setAttribute("class", "generations");
     tagInputGenerations.setAttribute("type", "checkbox");
-    // tagInputGenerations.setAttribute("checked", "");
+    if (x == 1) tagInputGenerations.setAttribute("checked", "");
 
     tagLabelGenerations.setAttribute("for", "generation-" + x);
     tagLabelGenerations.setAttribute("class", "label-generations");
@@ -57,65 +58,13 @@ function createFieldsetHTML() {
   return tagFieldsetGenerations;
 }
 
-function createOptionsHTML() {
-  let tagDivOptions = document.getElementById("options");
-  let tagFieldsetOptions = document.createElement("fieldset");
-  let tagLegendOptions = document.createElement("legend");
-  let tagFieldsetGenerations = createFieldsetHTML();
-  let tagDivRightOption = document.createElement("div");
-  let tagLabelAmountCards = document.createElement("label");
-  let tagSelectAmountCards = document.createElement("select");
-  let tagOptionAmountCards03 = document.createElement("option");
-  let tagOptionAmountCards05 = document.createElement("option");
-  let tagOptionAmountCards10 = document.createElement("option");
-  let tagButtonNewGame = document.createElement("button");
-
-  tagSelectAmountCards.appendChild(tagOptionAmountCards03);
-  tagSelectAmountCards.appendChild(tagOptionAmountCards05);
-  tagSelectAmountCards.appendChild(tagOptionAmountCards10);
-
-  tagDivRightOption.appendChild(tagLabelAmountCards);
-  tagDivRightOption.appendChild(tagSelectAmountCards);
-  tagDivRightOption.appendChild(tagButtonNewGame);
-
-  tagFieldsetOptions.appendChild(tagLegendOptions);
-  tagFieldsetOptions.appendChild(tagFieldsetGenerations);
-  tagFieldsetOptions.appendChild(tagDivRightOption);
-
-  tagDivOptions.appendChild(tagFieldsetOptions);
-
-  tagFieldsetOptions.setAttribute("class", "fieldset-options");
-
-  tagDivRightOption.setAttribute("class", "right-options");
-
-  tagLabelAmountCards.setAttribute("for", "amount-cards");
-
-  tagSelectAmountCards.setAttribute("id", "amount-cards");
-  tagSelectAmountCards.setAttribute("class", "game-options");
-
-  tagButtonNewGame.setAttribute("id", "button-new-game");
-  tagButtonNewGame.setAttribute("class", "game-options");
-
-  tagLegendOptions.innerHTML = "Opções";
-
-  tagLabelAmountCards.innerHTML = "Deck com: ";
-
-  tagOptionAmountCards03.value = "3";
-  tagOptionAmountCards03.text = "03 cartas";
-  tagOptionAmountCards05.value = "5";
-  tagOptionAmountCards05.text = "05 cartas";
-  tagOptionAmountCards10.value = "10";
-  tagOptionAmountCards10.text = "10 cartas";
-
-  tagButtonNewGame.addEventListener("click", newGame);
-  tagButtonNewGame.innerHTML = "Novo Jogo";
-}
-
 function createCardHTML(challenger) {
   let pokemonBacktroundCard = "https://jbrogan17.files.wordpress.com/2010/12/jared-pokemon-card-backside1.jpg?w=731";
   let pokemonBackground = "https://3.bp.blogspot.com/-H8cw4oVE78c/V4j3TBTL0SI/AAAAAAAABZI/QhZx30p-B2Inc5YDlyiekL8AdKS_IxkgACLcB/s1600/poke.png";
 
   let tagDivCards = document.querySelector("#cards");
+
+  let tagDivHealth = createHealthHTML(challenger);
 
   let tagDivFlipCard = document.createElement("div");
 
@@ -164,6 +113,8 @@ function createCardHTML(challenger) {
   tagDivFlipCard.appendChild(tagDivFlipCardInner);
 
   tagDivCards.appendChild(tagDivFlipCard);
+
+  (challenger == "player") ? tagDivCards.prepend(tagDivHealth) : tagDivCards.appendChild(tagDivHealth);
 
   tagDivFlipCard.classList.add("flip-card");
 
@@ -235,6 +186,26 @@ function createCounterHTML(challenger) {
   tagImgCounter.src = counterBackground;
 }
 
+function createHealthHTML(challenger) {
+  let tagDivHealth = document.createElement("div");
+  let tagDivHealthBar = document.createElement("div");
+  let tagSpanHealth = document.createElement("span");
+
+  tagDivHealth.appendChild(tagSpanHealth);
+  tagDivHealth.appendChild(tagDivHealthBar);
+
+  tagDivHealth.classList.add("container-health");
+
+  tagDivHealthBar.id = ("container-health-bar-" + challenger);
+  tagDivHealthBar.classList.add("container-health-bar");
+
+  tagSpanHealth.id = ("health-counter-" + challenger);
+  tagSpanHealth.classList.add("health-counter", "center", "pokemon-font-color");
+  tagSpanHealth.innerHTML = "HP " + ("0" + totalHp).slice(-4);
+
+  return tagDivHealth;
+}
+
 function createTypeIcon(type) {
   let tagSpanType = document.createElement("span");
 
@@ -259,8 +230,7 @@ function createTypesComparisonsHTML(tagSpanType1, tagSpanType2, result, messageD
       tagDivModal = document.createElement("div");
 
       tagDivModal.id = "types-comparisons-modal";
-      tagDivModal.classList.add("types-comparisons-modal");
-      tagDivModal.classList.add("center");
+      tagDivModal.classList.add("types-comparisons-modal", "center");
 
       tagBody.appendChild(tagDivModal);
     }
@@ -270,17 +240,14 @@ function createTypesComparisonsHTML(tagSpanType1, tagSpanType2, result, messageD
     tagDivComparisons.appendChild(tagIStatus);
     tagDivComparisons.appendChild(tagSpanType2);
 
-    tagDivComparisons.classList.add("types-comparisons");
-    tagDivComparisons.classList.add("animate__animated");
-    // Esta tem 1 segundo de duração
-    tagDivComparisons.classList.add("animate__bounceInUp");
-    tagDivComparisons.classList.add("center");
+    tagIStatus.classList.add("fas", result);
+
+    tagDivComparisons.classList.add("types-comparisons", "center", "animate__animated", "animate__bounceInDown");
+    // Esta animação tem 1 segundo de duração
     tagDivComparisons.addEventListener("animationend", () => {
       // Esta animação tem 4 segundos de delay e mais 1 segundo de duração
-      tagDivComparisons.classList.add("animate__bounceOutRight", "animate__delay-4s");
+      tagDivComparisons.classList.add("animate__bounceOutDown", "animate__delay-4s");
     });
-
-    tagIStatus.classList.add("fas", result);
 
     setTimeout(() => {
       tagDivComparisons.remove();
@@ -323,25 +290,25 @@ function atLeastOneChecked() {
   return atLeastOne;
 }
 
-function printsError() {
-  let tagBody = document.getElementById("body");
-  let tagDiv = document.createElement("div");
-  let tagSpan = document.createElement("span");
+function resetVariables() {
+  let tagDivHealth = document.getElementsByClassName("container-health");
+  let tagDivFlipCard = document.getElementsByClassName("flip-card");
+  let tagLabel = document.getElementById("page-title");
 
-  tagDiv.appendChild(tagSpan);
-  tagBody.appendChild(tagDiv);
+  amountCards = document.getElementById("amount-cards").value;
+  totalHp = parseInt(document.getElementById("total-health").value);
+  computerHp = totalHp;
+  playerHp = totalHp;
+  battleNumber = 0;
 
-  tagDiv.classList.add("error-modal");
-  tagDiv.classList.add("center")
+  tagLabel.innerHTML = "Super Trunfo - Pokémon";
+  computerDeck = "";
+  playerDeck = "";
 
-  tagSpan.classList.add("animate__animated");
-  tagSpan.classList.add("animate__tada");
-  tagSpan.classList.add("center");
-  tagSpan.innerHTML = "Selecione pelo menos uma geração";
-
-  setTimeout(() => {
-    tagDiv.remove();
-  }, 2500);
+  for (let x = 0; x < tagDivFlipCard.length; x) {
+    tagDivFlipCard[x].remove();
+    tagDivHealth[x].remove();
+  }
 }
 
 function showOptions() {
@@ -367,21 +334,6 @@ function showOptions() {
         game.classList.add("show-game");
       }, 1000);
     }
-  }
-}
-
-function resetVariables() {
-  let tagDivFlipCard = document.getElementsByClassName("flip-card");
-  let label = document.getElementById("page-title");
-  amountCards = document.getElementById("amount-cards").value;
-
-  label.innerHTML = "Super Trunfo - Pokémon";
-  battleNumber = 0;
-  playerDeck = "";
-  computerDeck = "";
-
-  for (let x = 0; x < tagDivFlipCard.length; x) {
-    tagDivFlipCard[x].remove();
   }
 }
 
@@ -413,6 +365,24 @@ async function startRound() {
   }
 }
 
+function printsError() {
+  let tagBody = document.getElementById("body");
+  let tagDiv = document.createElement("div");
+  let tagSpan = document.createElement("span");
+
+  tagDiv.appendChild(tagSpan);
+  tagBody.appendChild(tagDiv);
+
+  tagDiv.classList.add("error-modal", "center");
+
+  tagSpan.classList.add("animate__animated", "animate__tada", "center");
+  tagSpan.innerHTML = "Selecione pelo menos uma geração";
+
+  setTimeout(() => {
+    tagDiv.remove();
+  }, 2500);
+}
+
 function endRound() {
   let playerCard = document.getElementById("player-flip-card");
   let computerCard = document.getElementById("computer-flip-card");
@@ -426,7 +396,7 @@ function endRound() {
   audioFlipCard.play();
   clearAttributeButtons();
 
-  if (playerDeck.length > 0 && computerDeck.length > 0) {
+  if (playerDeck.length > 0 && computerDeck.length > 0 && playerHp > 0 && computerHp > 0) {
     setTimeout(() => {
       startRound();
     }, 1250);
@@ -557,10 +527,10 @@ async function getPokemon() {
 function endGame() {
   let label = document.getElementById("page-title");
 
-  if (playerDeck.length > 0) {
+  if (playerDeck.length > 0 && playerHp > 0) {
     label.innerHTML = "VOCÊ VENCEU!";
   } else {
-    label.innerHTML = "VOCÊ PERDEU PARA O BOT!";
+    label.innerHTML = "VOCÊ PERDEU!";
   }
 
   showOptions();
@@ -608,17 +578,17 @@ function checkAttribute(attribute) {
   let computerCard = document.getElementById("computer-flip-card");
   let buttons = document.getElementsByClassName("attributes");
   let multiplyAttack = checkType();
-
+  
   // Adiciona sombra nos atributos não escolhidos
   for (let button of buttons) {
     if (!button.id.includes(attribute)) {
       button.classList.add("attributes-not-chosen");
     }
   }
-
+  
   if (multiplyAttack != 0) {
     let challenger = currentPlayer();
-
+    
     if (challenger == "player") {
       buildPokemonCard(pokemonPlayer, challenger, multiplyAttack)
       pokemonPlayer[attribute] += parseInt(pokemonPlayer[attribute] * multiplyAttack);
@@ -643,12 +613,52 @@ function checkAttribute(attribute) {
       computerDeck.push(computerDeck.shift());
       computerDeck.push(playerDeck.shift());
     }
+
+    updateHealthBar(pokemonPlayer[attribute] - pokemonComputer[attribute])
   }, 1000)
 
   setTimeout(() => {
     refreshCardCounter();
     endRound();
   }, 5000);
+}
+
+function updateHealthBar(damage) {
+  let timePerPoint = (3000 - 250) / Math.abs(damage);
+  let tagDivHealthBar;
+  let tagSpanHealth;
+  let initialHP = 0;
+  let finalHP = 0;
+
+  if (damage < 0) {
+    tagDivHealthBar = document.getElementById("container-health-bar-player");
+    tagSpanHealth = document.getElementById("health-counter-player");
+    initialHP = playerHp;
+    playerHp -= Math.abs(damage);
+    finalHP = playerHp;
+  } else {
+    tagDivHealthBar = document.getElementById("container-health-bar-computer");
+    tagSpanHealth = document.getElementById("health-counter-computer");
+    initialHP = computerHp;
+    computerHp -= Math.abs(damage);
+    finalHP = computerHp;
+  }
+
+  let currentHp = (finalHP * 100 / totalHp).toFixed(2);
+  tagDivHealthBar.style.setProperty("--progress", (currentHp > 0 ? currentHp : 0));
+
+  refreshHealthCounter(timePerPoint, tagSpanHealth, initialHP, finalHP);
+}
+
+function refreshHealthCounter(timePerPoint, tagSpanHealth, initialHP, finalHP) {
+  tagSpanHealth.innerHTML = "HP " + ("000" + initialHP).slice(-4);
+
+  if (initialHP > finalHP && initialHP > 0) {
+    setTimeout(() => {
+      initialHP--;
+      refreshHealthCounter(timePerPoint, tagSpanHealth, initialHP, finalHP);
+    }, timePerPoint);
+  }
 }
 
 function getGenerationsChecked() {
@@ -853,6 +863,88 @@ function paint(object, style) {
   return element[object][style];
 }
 
+(function createOptionsHTML() {
+  let tagDivOptions = document.getElementById("options");
+  let tagFieldsetOptions = document.createElement("fieldset");
+  let tagLegendOptions = document.createElement("legend");
+  let tagFieldsetGenerations = createFieldsetHTML();
+  let tagDivRightOption = document.createElement("div");
+
+  let tagLabelTotalHealth = document.createElement("label");
+  let tagSelectTotalHealth = document.createElement("select");
+  let tagOptionTotalHealth300 = document.createElement("option");
+  let tagOptionTotalHealth500 = document.createElement("option");
+  let tagOptionTotalHealth1000 = document.createElement("option");
+
+  let tagLabelAmountCards = document.createElement("label");
+  let tagSelectAmountCards = document.createElement("select");
+  let tagOptionAmountCards03 = document.createElement("option");
+  let tagOptionAmountCards05 = document.createElement("option");
+  let tagOptionAmountCards10 = document.createElement("option");
+
+  let tagButtonNewGame = document.createElement("button");
+
+  tagSelectTotalHealth.appendChild(tagOptionTotalHealth300);
+  tagSelectTotalHealth.appendChild(tagOptionTotalHealth500);
+  tagSelectTotalHealth.appendChild(tagOptionTotalHealth1000);
+
+  tagSelectAmountCards.appendChild(tagOptionAmountCards03);
+  tagSelectAmountCards.appendChild(tagOptionAmountCards05);
+  tagSelectAmountCards.appendChild(tagOptionAmountCards10);
+
+  tagDivRightOption.appendChild(tagLabelTotalHealth);
+  tagDivRightOption.appendChild(tagSelectTotalHealth);
+  tagDivRightOption.appendChild(tagLabelAmountCards);
+  tagDivRightOption.appendChild(tagSelectAmountCards);
+  tagDivRightOption.appendChild(tagButtonNewGame);
+
+  tagFieldsetOptions.appendChild(tagLegendOptions);
+  tagFieldsetOptions.appendChild(tagFieldsetGenerations);
+  tagFieldsetOptions.appendChild(tagDivRightOption);
+
+  tagDivOptions.appendChild(tagFieldsetOptions);
+
+  tagFieldsetOptions.setAttribute("class", "fieldset-options");
+
+  tagDivRightOption.setAttribute("class", "right-options");
+
+  tagLabelTotalHealth.setAttribute("for", "total-health");
+
+  tagSelectTotalHealth.setAttribute("id", "total-health");
+  tagSelectTotalHealth.setAttribute("class", "game-options");
+
+  tagLabelAmountCards.setAttribute("for", "amount-cards");
+
+  tagSelectAmountCards.setAttribute("id", "amount-cards");
+  tagSelectAmountCards.setAttribute("class", "game-options");
+
+  tagButtonNewGame.setAttribute("id", "button-new-game");
+  tagButtonNewGame.setAttribute("class", "game-options");
+
+  tagLegendOptions.innerHTML = "Opções";
+
+  tagLabelTotalHealth.innerHTML = "HP inicial: ";
+
+  tagOptionTotalHealth300.value = "300";
+  tagOptionTotalHealth300.label = "300";
+  tagOptionTotalHealth500.value = "500";
+  tagOptionTotalHealth500.label = "500";
+  tagOptionTotalHealth1000.value = "1000";
+  tagOptionTotalHealth1000.label = "1000";
+
+  tagLabelAmountCards.innerHTML = "Deck com: ";
+
+  tagOptionAmountCards03.value = "3";
+  tagOptionAmountCards03.label = "03 cartas";
+  tagOptionAmountCards05.value = "5";
+  tagOptionAmountCards05.label = "05 cartas";
+  tagOptionAmountCards10.value = "10";
+  tagOptionAmountCards10.label = "10 cartas";
+
+  tagButtonNewGame.addEventListener("click", newGame);
+  tagButtonNewGame.innerHTML = "Novo Jogo";
+})();
+
 (function buildTypes() {
   class PokemonType {
     constructor(strong, weak, immune) {
@@ -880,4 +972,4 @@ function paint(object, style) {
   types["rock"] = new PokemonType(["bug", "fire", "flying", "ice"], ["fighting", "grass", "ground", "steel", "water"], []);
   types["steel"] = new PokemonType(["fairy", "ice", "rock"], ["fighting", "fire", "ground"], ["poison"]);
   types["water"] = new PokemonType(["fire", "ground", "rock"], ["electric", "grass"], []);
-})()
+})();

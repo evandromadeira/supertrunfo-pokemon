@@ -24,6 +24,24 @@
   justify-content: center;
 }
 
+.pokemon-font-color {
+  color: #fbcf00;
+  font-family: "Pokemon";
+  letter-spacing: 3px;
+  text-shadow:
+    2px 0 0 #2e58b1, -2px 0 0 #2e58b1, 0 2px 0 #2e58b1, 0 -2px 0 #2e58b1,
+    1px 1px #2e58b1, -1px -1px 0 #2e58b1, 1px -1px 0 #2e58b1, -1px 1px 0 #2e58b1;
+}
+
+.pokemon-font-color-inverse {
+  color: #2e58b1;
+  font-family: "Pokemon";
+  letter-spacing: 3px;
+  text-shadow:
+    2px 0 0 #fbcf00, -2px 0 0 #fbcf00, 0 2px 0 #fbcf00, 0 -2px 0 #fbcf00,
+    1px 1px #fbcf00, -1px -1px 0 #fbcf00, 1px -1px 0 #fbcf00, -1px 1px 0 #fbcf00;
+}
+
 body {
   height: 100%;
   width: 100%;
@@ -94,7 +112,7 @@ body {
   left: 0;
   top: 0;
   align-items: flex-end;
-  flex-direction: column;
+  flex-direction: column-reverse;
   position: fixed;
   text-align: center;
 }
@@ -152,7 +170,7 @@ body {
 
 .fieldset-options {
   height: 248px;
-  width: 320px;
+  width: auto;
   display: flex;
   position: absolute;
 }
@@ -184,18 +202,18 @@ label {
   font-size: 17px;
 }
 
-select {
-  margin: 0 10px;
-  padding: 0 10px;
-}
-
 .game-options {
   height: 45px;
   width: 120px;
-  margin: 5px 0;
+  margin: 0 0 5px;
   border: none;
   border-radius: 5px;
   font-size: 16px;
+  padding-left: 5px;
+}
+
+.right-options button {
+  margin: 10px 0 0;
 }
 
 button {
@@ -210,11 +228,6 @@ button {
 
 button:focus {
   outline: none;
-}
-
-.paint-button {
-  background-color: red;
-  color: white;
 }
 
 .game {
@@ -238,6 +251,55 @@ button:focus {
 @keyframes overflow {
   100% {
     overflow: visible;
+  }
+}
+
+.cards {
+  display: flex;
+}
+
+.container-health {
+  height: 320px;
+  width: 42px;
+  margin: 20px 10px 10px;
+  background: rgba(0, 0, 0, 80%);
+  border: #265285 5px solid;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.container-health-bar {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+
+  --progress: 100;
+}
+
+.container-health-bar::before {
+  content: "";
+  height: calc(var(--progress) * 1%);
+  background-color: hsl(calc(var(--progress)* 1.2), 85%, 50%);
+  transition: all 3s ease;
+}
+
+.health-counter {
+  height: 100%;
+  width: 100%;
+  font-size: 32px;
+  letter-spacing: -21px;
+  position: absolute;
+  text-orientation: upright;
+  writing-mode: vertical-rl;
+  -webkit-text-orientation: upright;
+  -webkit-writing-mode: vertical-rl;
+}
+
+@-moz-document url-prefix() {
+  .health-counter {
+      letter-spacing: normal;
   }
 }
 
@@ -405,24 +467,6 @@ button:focus {
   font-size: 20px;
   position: absolute;
   z-index: 1;
-}
-
-.pokemon-font-color {
-  color: #fbcf00;
-  font-family: "Pokemon";
-  letter-spacing: 3px;
-  text-shadow:
-    2px 0 0 #2e58b1, -2px 0 0 #2e58b1, 0 2px 0 #2e58b1, 0 -2px 0 #2e58b1,
-    1px 1px #2e58b1, -1px -1px 0 #2e58b1, 1px -1px 0 #2e58b1, -1px 1px 0 #2e58b1;
-}
-
-.pokemon-font-color-inverse {
-  color: #2e58b1;
-  font-family: "Pokemon";
-  letter-spacing: 3px;
-  text-shadow:
-    2px 0 0 #fbcf00, -2px 0 0 #fbcf00, 0 2px 0 #fbcf00, 0 -2px 0 #fbcf00,
-    1px 1px #fbcf00, -1px -1px 0 #fbcf00, 1px -1px 0 #fbcf00, -1px 1px 0 #fbcf00;
 }
 
 footer {
