@@ -4,11 +4,11 @@
 @font-face {
   font-family: "Pokemon";
   src: url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.eot");
-  src: url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.eot?#iefix") format("embedded-opentype")
-  ,    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.woff2") format("woff2")
-  ,    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.woff") format("woff")
-  ,    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.ttf") format("truetype")
-  ,    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.svg#Pokemon") format("svg");
+  src: url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.eot?#iefix") format("embedded-opentype"),
+    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.woff2") format("woff2"),
+    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.woff") format("woff"),
+    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.ttf") format("truetype"),
+    url("//db.onlinewebfonts.com/t/a222402127a0453c817a6cf4c3d9810b.svg#Pokemon") format("svg");
 }
 
 * {
@@ -146,12 +146,13 @@ body {
 .alura-logo {
   margin: 0 5px 0 10px;
   /* Inverte as cores da imagem */
-  /* filter: invert(1); */ 
+  /* filter: invert(1); */
   position: relative;
 }
 
 .page-title {
   font-size: 48px;
+  z-index: 1;
 }
 
 .options {
@@ -237,14 +238,9 @@ button:focus {
   transition: all 1s ease-in-out;
 }
 
-.game-subtitle {
-  font-size: 36px;
-  margin: -10px 0 0;
-}
-
 .show-game {
+  height: 410px;
   animation: overflow 3s forwards;
-  height: 420px;
   transition: all 1s ease-in-out;
 }
 
@@ -261,7 +257,7 @@ button:focus {
 .container-health {
   height: 320px;
   width: 42px;
-  margin: 20px 10px 10px;
+  margin: 20px 10px 5px;
   background: rgba(0, 0, 0, 80%);
   border: #265285 5px solid;
   border-radius: 12px;
@@ -299,12 +295,12 @@ button:focus {
 
 @-moz-document url-prefix() {
   .health-counter {
-      letter-spacing: normal;
+    letter-spacing: normal;
   }
 }
 
 .flip-card {
-  margin: 20px 15px 10px;
+  margin: 20px 15px 5px;
   height: 320px;
   width: 220px;
   perspective: 1000px;
@@ -467,6 +463,10 @@ button:focus {
   font-size: 20px;
   position: absolute;
   z-index: 1;
+}
+
+.game-subtitle {
+  font-size: 36px;
 }
 
 footer {

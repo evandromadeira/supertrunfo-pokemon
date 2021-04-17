@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
-  <link href="css/index.css" rel="stylesheet" type="text/css" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet" />
   <script src="https://kit.fontawesome.com/9dd29eadbb.js" crossorigin="anonymous"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet" />
+  <link href="css/index.css" rel="stylesheet" type="text/css" />
   <head>
     <title>Super Trunfo - Pokémon</title>
   </head>
@@ -22,14 +22,70 @@
         </a>
         <button onclick="showOptions()">Opções</button>
       </div>
-      <h1 id="page-title" class="page-title pokemon-font-color">Super Trunfo - Pokémon</h1>
-      <div id="options" class="options center ativo"></div>
+      <h1 id="page-title" class="page-title pokemon-font-color animate__animated">Super Trunfo - Pokémon</h1>
+      <div id="options" class="options center ativo">
+        <fieldset class="fieldset-options">
+          <legend>Opções</legend>
+          <fieldset id="fieldset-generations" class="fieldset-generations">
+            <legend>Gerações</legend>
+            <div class="container-generation">
+              <input id="generation-1" class="generations" type="checkbox" checked>
+              <label for="generation-1" class="label-generations"> 1ª geração</label>
+            </div>
+            <div class="container-generation">
+              <input id="generation-2" class="generations" type="checkbox">
+              <label for="generation-2" class="label-generations"> 2ª geração</label>
+            </div>
+            <div class="container-generation">
+              <input id="generation-3" class="generations" type="checkbox">
+              <label for="generation-3" class="label-generations"> 3ª geração</label>
+            </div>
+            <div class="container-generation">
+              <input id="generation-4" class="generations" type="checkbox">
+              <label for="generation-4" class="label-generations"> 4ª geração</label>
+            </div>
+            <div class="container-generation">
+              <input id="generation-5" class="generations" type="checkbox">
+              <label for="generation-5" class="label-generations"> 5ª geração</label>
+            </div>
+            <div class="container-generation">
+              <input id="generation-6" class="generations" type="checkbox">
+              <label for="generation-6" class="label-generations"> 6ª geração</label>
+            </div>
+            <div class="container-generation">
+              <input id="generation-7" class="generations" type="checkbox">
+              <label for="generation-7" class="label-generations"> 7ª geração</label>
+            </div>
+            <div class="container-generation">
+              <input id="generation-8" class="generations" type="checkbox">
+              <label for="generation-8" class="label-generations"> 8ª geração</label>
+            </div>
+          </fieldset>
+          <div class="right-options">
+            <label for="total-health">HP inicial:</label>
+            <select id="total-health" class="game-options">
+              <option value="300" label="300"></option>
+              <option value="500" label="500"></option>
+              <option value="1000" label="1000"></option>
+            </select>
+            <label for="amount-cards">Deck com:</label>
+            <select id="amount-cards" class="game-options">
+              <option value="3" label="03 cartas"></option>
+              <option value="5" label="05 cartas"></option>
+              <option value="10" label="10 cartas"></option>
+            </select>
+            <button id="button-new-game" class="game-options" onclick="newGame()">Novo Jogo</button>
+          </div>
+        </fieldset>
+      </div>
       <div id="game" class="game">
         <div class="cards" id="cards"></div>
         <h2 id="attribute-choice-label" class="game-subtitle pokemon-font-color-inverse">Escolha o seu atributo</h2>
       </div>
     </div>
   </body>
-  <footer>Created by Evandro Madeira</footer>
+  <a href="https://github.com/evandromadeira" target="_blank">
+    <footer>Created by Evandro Madeira</footer>
+  </a>
   <script src="js/index.js"></script>
 </html>

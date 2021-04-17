@@ -1,7 +1,10 @@
 "use strict"
 
-let audioFlipCard = new Audio("https://freesound.org/data/previews/536/536782_1415754-lq.mp3");
+let backgroundLegendary = "https://besthqwallpapers.com/Uploads/25-2-2019/81742/thumb2-4k-golden-silk-fabric-texture-silk-golden-background.jpg";
+let backgroundMythical = "https://images.pexels.com/photos/6498990/pexels-photo-6498990.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940";
+let backgroundNormal = "https://3.bp.blogspot.com/-H8cw4oVE78c/V4j3TBTL0SI/AAAAAAAABZI/QhZx30p-B2Inc5YDlyiekL8AdKS_IxkgACLcB/s1600/poke.png";
 let themeSongAudio = new Audio("https://mp3.fastupload.co/data/1617853628/yt1s.com-01-Pokemon-Theme-PortugueseBR.mp3");
+let audioFlipCard = new Audio("https://freesound.org/data/previews/536/536782_1415754-lq.mp3");
 let forward = document.getElementById("forward");
 let pokemonPlayer, pokemonComputer;
 let optionsOpened = true;
@@ -21,46 +24,8 @@ themeSongAudio.loop = true;
 
 if (window.location.href.includes("github")) { forward.remove(); }
 
-function createFieldsetHTML() {
-  let tagFieldsetGenerations = document.createElement("fieldset");
-  let tagLegendGenerations = document.createElement("legend");
-
-  tagFieldsetGenerations.appendChild(tagLegendGenerations);
-
-  tagFieldsetGenerations.setAttribute("id", "fieldset-generations");
-  tagFieldsetGenerations.setAttribute("class", "fieldset-generations");
-
-  tagLegendGenerations.innerHTML = "Gerações";
-
-  for (let x = 1; x <= 8; x++) {
-    let tagDivGenerations = document.createElement("div");
-    let tagInputGenerations = document.createElement("input");
-    let tagLabelGenerations = document.createElement("label");
-
-    tagDivGenerations.appendChild(tagInputGenerations);
-    tagDivGenerations.appendChild(tagLabelGenerations);
-
-    tagFieldsetGenerations.appendChild(tagDivGenerations);
-
-    tagDivGenerations.setAttribute("class", "container-generation");
-
-    tagInputGenerations.setAttribute("id", "generation-" + x);
-    tagInputGenerations.setAttribute("class", "generations");
-    tagInputGenerations.setAttribute("type", "checkbox");
-    if (x == 1) tagInputGenerations.setAttribute("checked", "");
-
-    tagLabelGenerations.setAttribute("for", "generation-" + x);
-    tagLabelGenerations.setAttribute("class", "label-generations");
-
-    tagLabelGenerations.innerHTML = " " + x + "ª geração";
-  }
-
-  return tagFieldsetGenerations;
-}
-
 function createCardHTML(challenger) {
-  let pokemonBacktroundCard = "https://jbrogan17.files.wordpress.com/2010/12/jared-pokemon-card-backside1.jpg?w=731";
-  let pokemonBackground = "https://3.bp.blogspot.com/-H8cw4oVE78c/V4j3TBTL0SI/AAAAAAAABZI/QhZx30p-B2Inc5YDlyiekL8AdKS_IxkgACLcB/s1600/poke.png";
+  let pokemonBackgroundCard = "https://jbrogan17.files.wordpress.com/2010/12/jared-pokemon-card-backside1.jpg?w=731";
 
   let tagDivCards = document.querySelector("#cards");
 
@@ -156,8 +121,8 @@ function createCardHTML(challenger) {
   tagButtonPokemonSpeed.classList.add("attributes", "center", "pokemon-font-color");
   tagButtonPokemonSpeed.setAttribute("onclick", "playerAttributeChoice('speed')")
 
-  tagImgCardBackBackground.src = pokemonBacktroundCard;
-  tagImgPokemonBackground.src = pokemonBackground;
+  tagImgCardBackBackground.src = pokemonBackgroundCard;
+  tagImgPokemonBackground.src = backgroundNormal;
 
   createCounterHTML(challenger);
 }
@@ -221,7 +186,6 @@ function createTypeIcon(type) {
 function createTypesComparisonsHTML(tagSpanType1, tagSpanType2, result, messageDelay) {
   setTimeout(() => {
     let tagBody = document.getElementById("body");
-
     let tagDivModal = document.getElementById("types-comparisons-modal");
     let tagDivComparisons = document.createElement("div");
     let tagIStatus = document.createElement("i");
@@ -338,28 +302,26 @@ function showOptions() {
 }
 
 function buildDeck() {
-  playerDeck = assembleDeck();
-  computerDeck = assembleDeck();
+  let pokemonGenerationsChecked = getGenerationsChecked();
+
+  playerDeck = assembleDeck(pokemonGenerationsChecked);
+  computerDeck = assembleDeck(pokemonGenerationsChecked);
 }
 
 function refreshCardCounter() {
-  let labelPlayer = document.getElementById("player-label-card-counter");
-  let labelComputer = document.getElementById("computer-label-card-counter");
-
-  labelPlayer.innerHTML = playerDeck.length;
-  labelComputer.innerHTML = computerDeck.length;
+  document.getElementById("player-label-card-counter").innerHTML = playerDeck.length;
+  document.getElementById("computer-label-card-counter").innerHTML = computerDeck.length;
 }
 
 async function startRound() {
-  let computerAttribute = "";
   battleNumber++
 
-  if (currentPlayer() == "player") {
+  if (battleNumber % 2 > 0) {
     changeDisabledAttributeButtons(false);
     showPokemonPlayer();
   } else {
     await showPokemonComputer();
-    computerAttribute = computerAttributeChoice();
+    let computerAttribute = computerAttributeChoice();
     await showPokemonPlayer();
     checkAttribute(computerAttribute);
   }
@@ -384,58 +346,49 @@ function printsError() {
 }
 
 function endRound() {
-  let playerCard = document.getElementById("player-flip-card");
-  let computerCard = document.getElementById("computer-flip-card");
-  let frontPlayerCard = document.getElementById("player-flip-card-inner");
-  let frontComputerCard = document.getElementById("computer-flip-card-inner");
+  document.getElementById("player-flip-card").classList.remove("scaled");
+  document.getElementById("computer-flip-card").classList.remove("scaled");
+  document.getElementById("player-flip-card-inner").classList.remove("rotate-card");
+  document.getElementById("computer-flip-card-inner").classList.remove("rotate-card");
 
-  playerCard.classList.remove("scaled");
-  computerCard.classList.remove("scaled");
-  frontPlayerCard.classList.remove("rotate-card");
-  frontComputerCard.classList.remove("rotate-card");
   audioFlipCard.play();
   clearAttributeButtons();
 
-  if (playerDeck.length > 0 && computerDeck.length > 0 && playerHp > 0 && computerHp > 0) {
-    setTimeout(() => {
+  setTimeout(() => {
+    if (playerDeck.length > 0 && computerDeck.length > 0 && playerHp > 0 && computerHp > 0) {
       startRound();
-    }, 1250);
-  } else {
-    endGame();
-  }
+    } else {
+      endGame();
+    }
+  }, 1000);
 }
 
 async function showPokemonPlayer() {
-  let flipCardInner = document.getElementById("player-flip-card-inner");
-
   pokemonId = playerDeck[0];
   pokemonPlayer = await getPokemon();
 
   changeBackground(pokemonPlayer, "player");
   buildPokemonCard(pokemonPlayer, "player", 0);
 
-  flipCardInner.classList.add("rotate-card");
+  document.getElementById("player-flip-card-inner").classList.add("rotate-card");
   audioFlipCard.play();
 }
 
 async function showPokemonComputer() {
-  let flipCardInner = document.getElementById("computer-flip-card-inner");
-
   pokemonId = computerDeck[0];
   pokemonComputer = await getPokemon();
 
   changeBackground(pokemonComputer, "computer");
   buildPokemonCard(pokemonComputer, "computer", 0);
 
-  flipCardInner.classList.add("rotate-card");
+  document.getElementById("computer-flip-card-inner").classList.add("rotate-card");
   audioFlipCard.play();
 }
 
-function assembleDeck() {
+function assembleDeck(pokemonGenerationsChecked) {
   let amountCardsDeck = amountCards;
   let cardNumber = 0;
   let deck = [];
-  let pokemonGenerationsChecked = getGenerationsChecked();
 
   while (amountCardsDeck) {
     cardNumber = pokemonGenerationsChecked[Math.floor(Math.random() * pokemonGenerationsChecked.length)]
@@ -500,7 +453,7 @@ async function getPokemon() {
       pokemonData.image = "https://assets.pokemon.com/assets/cms2/img/pokedex/full/" + ("00" + pokemonId).slice(-3) + ".png";
     })
     .catch(() => {
-      console.log("Error request pokémon.");
+      console.log("Error request pokémon. Id: " + pokemonId);
       if (pokemonId == playerDeck[0]) {
         playerDeck[0] = ++pokemonId;
         showPokemonPlayer();
@@ -518,7 +471,7 @@ async function getPokemon() {
       pokemonData.generation = poke.generation.name;
     })
     .catch(() => {
-      console.log("Error request species.");
+      console.log("Error request species. Id: " + pokemonId);
     })
 
   return pokemonData;
@@ -529,11 +482,21 @@ function endGame() {
 
   if (playerDeck.length > 0 && playerHp > 0) {
     label.innerHTML = "VOCÊ VENCEU!";
+    label.classList.add("animate__tada", "animate__repeat-2");
+    label.addEventListener('animationend', () => {
+      label.classList.remove("animate__tada", "animate__repeat-2");
+    });
   } else {
     label.innerHTML = "VOCÊ PERDEU!";
+    label.classList.add("animate__hinge");
+    label.addEventListener('animationend', () => {
+      label.classList.remove("animate__hinge");
+      label.classList.add("animate__zoomInUp", "animate__delay-1s");
+      label.addEventListener('animationend', () => {
+        label.classList.remove("animate__zoomInUp", "animate__delay-1s");
+      });
+    });
   }
-
-  showOptions();
 }
 
 async function playerAttributeChoice(playerAttribute) {
@@ -578,17 +541,17 @@ function checkAttribute(attribute) {
   let computerCard = document.getElementById("computer-flip-card");
   let buttons = document.getElementsByClassName("attributes");
   let multiplyAttack = checkType();
-  
+
   // Adiciona sombra nos atributos não escolhidos
   for (let button of buttons) {
     if (!button.id.includes(attribute)) {
       button.classList.add("attributes-not-chosen");
     }
   }
-  
+
   if (multiplyAttack != 0) {
-    let challenger = currentPlayer();
-    
+    let challenger = battleNumber % 2 > 0 ? "player" : "computer";
+
     if (challenger == "player") {
       buildPokemonCard(pokemonPlayer, challenger, multiplyAttack)
       pokemonPlayer[attribute] += parseInt(pokemonPlayer[attribute] * multiplyAttack);
@@ -624,7 +587,6 @@ function checkAttribute(attribute) {
 }
 
 function updateHealthBar(damage) {
-  let timePerPoint = (3000 - 250) / Math.abs(damage);
   let tagDivHealthBar;
   let tagSpanHealth;
   let initialHP = 0;
@@ -644,7 +606,11 @@ function updateHealthBar(damage) {
     finalHP = computerHp;
   }
 
+  damage = (Math.abs(damage) > initialHP ? initialHP : Math.abs(damage));
+
+  let timePerPoint = (3000 - (5 * damage)) / damage;
   let currentHp = (finalHP * 100 / totalHp).toFixed(2);
+
   tagDivHealthBar.style.setProperty("--progress", (currentHp > 0 ? currentHp : 0));
 
   refreshHealthCounter(timePerPoint, tagSpanHealth, initialHP, finalHP);
@@ -685,19 +651,16 @@ function setGenerationsData() {
   for (let x = 0; x < 8; x++) {
     generationsData.push({
       number: x + 1,
-      checked: checkGenerations[x].checked ? true : false,
+      checked: checkGenerations[x].checked,
       first: first[x],
       last: last[x]
-    })
+    });
   }
 
   return generationsData;
 }
 
 function changeBackground(pokemon, challenger) {
-  let backgroundLegendary = "https://besthqwallpapers.com/Uploads/25-2-2019/81742/thumb2-4k-golden-silk-fabric-texture-silk-golden-background.jpg";
-  let backgroundMythical = "https://images.pexels.com/photos/6498990/pexels-photo-6498990.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940";
-  let backgroundNormal = "https://3.bp.blogspot.com/-H8cw4oVE78c/V4j3TBTL0SI/AAAAAAAABZI/QhZx30p-B2Inc5YDlyiekL8AdKS_IxkgACLcB/s1600/poke.png";
   let tagImg = document.getElementById(challenger + "-img-pokemon-background");
 
   tagImg.classList.remove("legendary");
@@ -753,10 +716,6 @@ function checkType() {
   }
 
   return multiplyAttack < -1 ? -1 : multiplyAttack;
-}
-
-function currentPlayer() {
-  return battleNumber % 2 > 0 ? "player" : "computer";
 }
 
 function translate(text) {
@@ -862,88 +821,6 @@ function paint(object, style) {
 
   return element[object][style];
 }
-
-(function createOptionsHTML() {
-  let tagDivOptions = document.getElementById("options");
-  let tagFieldsetOptions = document.createElement("fieldset");
-  let tagLegendOptions = document.createElement("legend");
-  let tagFieldsetGenerations = createFieldsetHTML();
-  let tagDivRightOption = document.createElement("div");
-
-  let tagLabelTotalHealth = document.createElement("label");
-  let tagSelectTotalHealth = document.createElement("select");
-  let tagOptionTotalHealth300 = document.createElement("option");
-  let tagOptionTotalHealth500 = document.createElement("option");
-  let tagOptionTotalHealth1000 = document.createElement("option");
-
-  let tagLabelAmountCards = document.createElement("label");
-  let tagSelectAmountCards = document.createElement("select");
-  let tagOptionAmountCards03 = document.createElement("option");
-  let tagOptionAmountCards05 = document.createElement("option");
-  let tagOptionAmountCards10 = document.createElement("option");
-
-  let tagButtonNewGame = document.createElement("button");
-
-  tagSelectTotalHealth.appendChild(tagOptionTotalHealth300);
-  tagSelectTotalHealth.appendChild(tagOptionTotalHealth500);
-  tagSelectTotalHealth.appendChild(tagOptionTotalHealth1000);
-
-  tagSelectAmountCards.appendChild(tagOptionAmountCards03);
-  tagSelectAmountCards.appendChild(tagOptionAmountCards05);
-  tagSelectAmountCards.appendChild(tagOptionAmountCards10);
-
-  tagDivRightOption.appendChild(tagLabelTotalHealth);
-  tagDivRightOption.appendChild(tagSelectTotalHealth);
-  tagDivRightOption.appendChild(tagLabelAmountCards);
-  tagDivRightOption.appendChild(tagSelectAmountCards);
-  tagDivRightOption.appendChild(tagButtonNewGame);
-
-  tagFieldsetOptions.appendChild(tagLegendOptions);
-  tagFieldsetOptions.appendChild(tagFieldsetGenerations);
-  tagFieldsetOptions.appendChild(tagDivRightOption);
-
-  tagDivOptions.appendChild(tagFieldsetOptions);
-
-  tagFieldsetOptions.setAttribute("class", "fieldset-options");
-
-  tagDivRightOption.setAttribute("class", "right-options");
-
-  tagLabelTotalHealth.setAttribute("for", "total-health");
-
-  tagSelectTotalHealth.setAttribute("id", "total-health");
-  tagSelectTotalHealth.setAttribute("class", "game-options");
-
-  tagLabelAmountCards.setAttribute("for", "amount-cards");
-
-  tagSelectAmountCards.setAttribute("id", "amount-cards");
-  tagSelectAmountCards.setAttribute("class", "game-options");
-
-  tagButtonNewGame.setAttribute("id", "button-new-game");
-  tagButtonNewGame.setAttribute("class", "game-options");
-
-  tagLegendOptions.innerHTML = "Opções";
-
-  tagLabelTotalHealth.innerHTML = "HP inicial: ";
-
-  tagOptionTotalHealth300.value = "300";
-  tagOptionTotalHealth300.label = "300";
-  tagOptionTotalHealth500.value = "500";
-  tagOptionTotalHealth500.label = "500";
-  tagOptionTotalHealth1000.value = "1000";
-  tagOptionTotalHealth1000.label = "1000";
-
-  tagLabelAmountCards.innerHTML = "Deck com: ";
-
-  tagOptionAmountCards03.value = "3";
-  tagOptionAmountCards03.label = "03 cartas";
-  tagOptionAmountCards05.value = "5";
-  tagOptionAmountCards05.label = "05 cartas";
-  tagOptionAmountCards10.value = "10";
-  tagOptionAmountCards10.label = "10 cartas";
-
-  tagButtonNewGame.addEventListener("click", newGame);
-  tagButtonNewGame.innerHTML = "Novo Jogo";
-})();
 
 (function buildTypes() {
   class PokemonType {
