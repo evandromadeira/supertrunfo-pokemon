@@ -9,11 +9,16 @@
   <body id="body" class="center">
     <div id="forward" class="forward center">
       <h6>
-        <p>Este projeto ainda não está finalizado. Última atualização: 15/04/21</p>
         <p>Se você gostou, por favor deixe o seu like aqui em cima. ❤️ Obrigado!</p>
+        <p>Última atualização: 17/04/21</p>
       </h6>
     </div>
-    <button id="theme-song" class="theme-song" onclick="themeSong()">🔇</button><!-- 🔊 -->
+    <div class="container-music-control">
+      <button class="theme-song" onclick="musicControl('play')"><i id="theme-song-play" class="fas fa-play"></i></button>
+      <button class="theme-song" onclick="musicControl('up')"><i class="fas fa-volume-up"></i></button>
+      <button id="volume" class="volume">50%</input>
+      <button class="theme-song" onclick="musicControl('down')"><i class="fas fa-volume-down"></i></button>
+    </div>
     <div class="container center">
       <div class="center">
         <img src="https://www.alura.com.br/assets/img/imersoes/dev-2021/logo-imersao-super-trunfo.png" class="page-logo">

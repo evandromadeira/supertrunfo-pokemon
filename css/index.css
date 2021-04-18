@@ -74,16 +74,38 @@ body {
   margin: auto;
   color: black;
   font-size: 16px;
+  letter-spacing: -0.5px;
 }
 
-.theme-song {
+.container-music-control {
+  height: 65px;
+  width: 65px;
+  left: 0;
+  top: 0;
+  background-color: rgba(0, 0, 0, 35%);
+  border-radius: 10px;
+  margin: 10px;
+  display: grid;
+  overflow: hidden;
+  padding: 5px;
+  position: absolute;
+  transition: all 500ms ease;
+}
+
+.container-music-control:hover {
+  height: 230px;
+}
+
+.theme-song, .volume {
   height: 45px;
   width: 45px;
-  top: 0;
-  left: 0;
-  margin: 10px;
+  margin: 5px;
   font-size: 20px;
-  position: absolute;
+}
+
+.volume {
+  font-weight: bold;
+  font-size: 12px;
 }
 
 .error-modal {
@@ -94,7 +116,7 @@ body {
   text-align: center;
   position: fixed;
   overflow: hidden;
-  background-color: rgba(0, 0, 0, 50%);
+  background-color: rgba(0, 0, 0, 35%);
 }
 
 .error-modal span {

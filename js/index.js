@@ -3,7 +3,7 @@
 let backgroundLegendary = "https://besthqwallpapers.com/Uploads/25-2-2019/81742/thumb2-4k-golden-silk-fabric-texture-silk-golden-background.jpg";
 let backgroundMythical = "https://images.pexels.com/photos/6498990/pexels-photo-6498990.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940";
 let backgroundNormal = "https://3.bp.blogspot.com/-H8cw4oVE78c/V4j3TBTL0SI/AAAAAAAABZI/QhZx30p-B2Inc5YDlyiekL8AdKS_IxkgACLcB/s1600/poke.png";
-let themeSongAudio = new Audio("https://mp3.fastupload.co/data/1617853628/yt1s.com-01-Pokemon-Theme-PortugueseBR.mp3");
+let themeSongAudio = new Audio("https://mp3.fastupload.co/data/1618687702/pokemon-theme-music.mp3");
 let audioFlipCard = new Audio("https://freesound.org/data/previews/536/536782_1415754-lq.mp3");
 let forward = document.getElementById("forward");
 let pokemonPlayer, pokemonComputer;
@@ -19,7 +19,7 @@ let computerDeck = "";
 let playerDeck = "";
 let types = {};
 
-themeSongAudio.volume = 0.25;
+themeSongAudio.volume = 0.5;
 themeSongAudio.loop = true;
 
 if (window.location.href.includes("github")) { forward.remove(); }
@@ -241,17 +241,7 @@ function newGame() {
 }
 
 function atLeastOneChecked() {
-  let generations = document.getElementsByClassName("generations");
-  let atLeastOne = false;
-
-  for (let gen of generations) {
-    if (gen.checked) {
-      atLeastOne = true;
-      break;
-    }
-  }
-
-  return atLeastOne;
+  return document.getElementById("fieldset-generations").querySelectorAll(".generations:checked").length;
 }
 
 function resetVariables() {
@@ -316,7 +306,7 @@ function refreshCardCounter() {
 async function startRound() {
   battleNumber++
 
-  if (battleNumber % 2 > 0) {
+  if (battleNumber % 2) {
     changeDisabledAttributeButtons(false);
     showPokemonPlayer();
   } else {
@@ -355,7 +345,7 @@ function endRound() {
   clearAttributeButtons();
 
   setTimeout(() => {
-    if (playerDeck.length > 0 && computerDeck.length > 0 && playerHp > 0 && computerHp > 0) {
+    if (playerDeck.length && computerDeck.length && playerHp > 0 && computerHp > 0) {
       startRound();
     } else {
       endGame();
@@ -431,7 +421,7 @@ function buildPokemonCard(currentPokemon, challenger, multiplyAttack) {
   computerDefense.innerHTML = "Defesa: " + currentPokemon.defense;
   computerSpeed.innerHTML = "Velocidade: " + currentPokemon.speed;
 
-  if (multiplyAttack != 0) {
+  if (multiplyAttack) {
     computerAttack.innerHTML += (multiplyAttack > 0 ? " + " : " - ") + parseInt(Math.abs(currentPokemon.attack * multiplyAttack));
     computerDefense.innerHTML += (multiplyAttack > 0 ? " + " : " - ") + parseInt(Math.abs(currentPokemon.defense * multiplyAttack));
     computerSpeed.innerHTML += (multiplyAttack > 0 ? " + " : " - ") + parseInt(Math.abs(currentPokemon.speed * multiplyAttack));
@@ -480,7 +470,7 @@ async function getPokemon() {
 function endGame() {
   let label = document.getElementById("page-title");
 
-  if (playerDeck.length > 0 && playerHp > 0) {
+  if (playerDeck.length && playerHp > 0) {
     label.innerHTML = "VOCÊ VENCEU!";
     label.classList.add("animate__tada", "animate__repeat-2");
     label.addEventListener('animationend', () => {
@@ -549,8 +539,8 @@ function checkAttribute(attribute) {
     }
   }
 
-  if (multiplyAttack != 0) {
-    let challenger = battleNumber % 2 > 0 ? "player" : "computer";
+  if (multiplyAttack) {
+    let challenger = battleNumber % 2 ? "player" : "computer";
 
     if (challenger == "player") {
       buildPokemonCard(pokemonPlayer, challenger, multiplyAttack)
@@ -643,7 +633,7 @@ function getGenerationsChecked() {
 }
 
 function setGenerationsData() {
-  let checkGenerations = document.getElementsByClassName("generations");
+  let checkGenerations = document.getElementById("fieldset-generations").getElementsByClassName("generations");
   let first = [1, 152, 252, 387, 494, 650, 722, 810];
   let last = [151, 251, 386, 493, 649, 721, 809, 898];
   let generationsData = [];
@@ -677,23 +667,39 @@ function changeBackground(pokemon, challenger) {
   }
 }
 
-function themeSong() {
-  let icon = document.getElementById("theme-song");
+function musicControl(command) {
+  let icon = document.getElementById("theme-song-play");
 
-  if (playThemeSong) {
-    icon.innerHTML = "🔇";
-  } else {
-    icon.innerHTML = "🔊";
-    themeSongAudio.play();
+  switch (command) {
+    case "play": {
+      if (playThemeSong) {
+        themeSongAudio.pause();
+        icon.classList.remove("fa-pause");
+        icon.classList.add("fa-play");
+      } else {
+        themeSongAudio.play();
+        icon.classList.remove("fa-play");
+        icon.classList.add("fa-pause");
+      }
+      playThemeSong = !playThemeSong;
+      break;
+    }
+    case "up": {
+      if (themeSongAudio.volume < 1) themeSongAudio.volume = Math.round((themeSongAudio.volume + 0.05) * 100) / 100;
+      break;
+    }
+    case "down": {
+      if (themeSongAudio.volume > 0) themeSongAudio.volume = Math.round((themeSongAudio.volume - 0.05) * 100) / 100;
+      break;
+    }
   }
 
-  themeSongAudio.muted = playThemeSong;
-  playThemeSong = !playThemeSong;
+  document.getElementById("volume").innerHTML = Math.trunc(themeSongAudio.volume * 100) + "%";
 }
 
 function checkType() {
-  let attackerTypes = battleNumber % 2 > 0 ? pokemonPlayer.types : pokemonComputer.types;
-  let defenderTypes = battleNumber % 2 > 0 ? pokemonComputer.types : pokemonPlayer.types;
+  let attackerTypes = battleNumber % 2 ? pokemonPlayer.types : pokemonComputer.types;
+  let defenderTypes = battleNumber % 2 ? pokemonComputer.types : pokemonPlayer.types;
   let multiplyAttack = 0;
   let setDelay = 250;
   let times = 0;
